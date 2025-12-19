@@ -6,6 +6,7 @@ services:
     container_name: novafeed_web
     command: |
       sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
@@ -14,14 +15,36 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DEBUG=True
-      - ALLOWED_HOSTS=localhost,127.0.0.1
-      - DATABASE_URL=sqlite:///db.sqlite3
-      - SECRET_KEY=django-insecure-a8fzepjts#9i36tny87z59d=^5exmkk$a8a0^**vww145wwjce
+      - DEBUG=${DEBUG:-True}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,web}
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-me}
+      - DATABASE_ENGINE=${DATABASE_ENGINE:-django.db.backends.postgresql}
+      - DATABASE_NAME=${DATABASE_NAME:-novafeed}
+      - DATABASE_USER=${DATABASE_USER:-novafeed_user}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-novafeed_password}
+      - DATABASE_HOST=${DATABASE_HOST:-db}
+      - DATABASE_PORT=${DATABASE_PORT:-5432}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_DB=${REDIS_DB:-0}
+      - USE_REDIS_CACHE=${USE_REDIS_CACHE:-True}
+      - SESSION_ENGINE=${SESSION_ENGINE:-django.contrib.sessions.backends.db}
+      - WEBAUTHN_RP_ID=${WEBAUTHN_RP_ID:-localhost}
+      - LANGUAGE_CODE=${LANGUAGE_CODE:-ja}
+      - TIME_ZONE=${TIME_ZONE:-Asia/Tokyo}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - novafeed_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   db:
     image: postgres:16-alpine
@@ -29,25 +52,29 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=novafeed
-      - POSTGRES_USER=novafeed_user
-      - POSTGRES_PASSWORD=novafeed_password
+      - POSTGRES_DB=${DATABASE_NAME:-novafeed}
+      - POSTGRES_USER=${DATABASE_USER:-novafeed_user}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-novafeed_password}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF8 --locale=ja_JP.UTF-8
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     networks:
       - novafeed_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U novafeed_user"]
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-novafeed_user} -d ${DATABASE_NAME:-novafeed}"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
-  # Optional: Redis for caching and session management
   redis:
     image: redis:7-alpine
     container_name: novafeed_redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     networks:
       - novafeed_network
     healthcheck:
@@ -55,9 +82,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
 volumes:
   postgres_data:
+  redis_data:
   static_volume:
   media_volume:
 
