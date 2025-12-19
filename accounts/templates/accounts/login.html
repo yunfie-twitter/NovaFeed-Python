@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン - Enova ID</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+        }
+        
+        .login-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            padding: 48px 40px 36px;
+        }
+        
+        .google-logo {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        
+        .google-logo-text {
+            font-size: 24px;
+            font-weight: 400;
+            color: #5f6368;
+            letter-spacing: -0.5px;
+        }
+        
+        .login-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 400;
+            color: #202124;
+            margin: 16px 0 8px;
+        }
+        
+        .login-subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: #5f6368;
+            margin-bottom: 32px;
+        }
+        
+        .welcome-back {
+            text-align: center;
+            font-size: 16px;
+            color: #202124;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .user-email-display {
+            text-align: center;
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .user-email-display .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .form-step {
+            display: none;
+        }
+        
+        .form-step.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.2s;
+            background-color: white;
+        }
+        
+        .form-control:hover {
+            border-color: #80868b;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+        }
+        
+        .form-control.is-invalid {
+            border-color: #d93025;
+        }
+        
+        .show-password-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #5f6368;
+            cursor: pointer;
+            user-select: none;
+            margin-top: 12px;
+        }
+        
+        .show-password-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #1a73e8;
+        }
+        
+        .invalid-feedback {
+            color: #d93025;
+            font-size: 12px;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .form-text {
+            font-size: 12px;
+            color: #5f6368;
+            margin-top: 8px;
+        }
+        
+        .form-text a {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .form-text a:hover {
+            text-decoration: underline;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 32px;
+        }
+        
+        .btn-back {
+            padding: 10px 24px;
+            background-color: transparent;
+            color: #1a73e8;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-back:hover {
+            background-color: rgba(26, 115, 232, 0.04);
+        }
+        
+        .btn-next,
+        .btn-login {
+            padding: 10px 24px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-next:hover,
+        .btn-login:hover {
+            background-color: #1765cc;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .btn-next:disabled,
+        .btn-login:disabled {
+            background-color: #dadce0;
+            color: #80868b;
+            cursor: not-allowed;
+        }
+        
+        .spinner {
+            display: none;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        .btn-next.loading .spinner,
+        .btn-login.loading .spinner {
+            display: block;
+        }
+        
+        .btn-next.loading .btn-text,
+        .btn-login.loading .btn-text {
+            display: none;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .login-method-title {
+            text-align: center;
+            font-size: 16px;
+            color: #202124;
+            margin-bottom: 24px;
+        }
+        
+        .login-method-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .login-method-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: white;
+            color: #3c4043;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-align: left;
+        }
+        
+        .login-method-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #d2e3fc;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .login-method-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .login-method-content {
+            flex: 1;
+        }
+        
+        .login-method-label {
+            font-weight: 500;
+            color: #202124;
+            margin-bottom: 2px;
+        }
+        
+        .login-method-desc {
+            font-size: 12px;
+            color: #5f6368;
+        }
+        
+        .guest-mode {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 12px;
+            color: #5f6368;
+        }
+        
+        .guest-mode a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        
+        .guest-mode a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer-links {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #dadce0;
+        }
+        
+        .footer-links a {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            background-color: #fef7e0;
+            border-left: 4px solid #f9ab00;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #3c4043;
+        }
+        
+        .error-message i {
+            color: #f9ab00;
+            margin-right: 8px;
+        }
+        
+        @media (max-width: 576px) {
+            .login-card {
+                padding: 32px 24px 24px;
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="google-logo">
+                <div class="google-logo-text">Enova ID</div>
+            </div>
+            
+            <form method="post" id="loginForm">
+                {% csrf_token %}
+                
+                <!-- ステップ1: ユーザー名入力 -->
+                <div class="form-step active" id="step1">
+                    <h1 class="login-title">ログイン</h1>
+                    <p class="login-subtitle">Enova IDアカウントを使用</p>
+                    
+                    <div class="form-group">
+                        <input type="text" 
+                               name="username" 
+                               class="form-control"
+                               id="id_username"
+                               placeholder="メールアドレスまたはユーザーID"
+                               required
+                               autofocus>
+                        <div class="form-text">
+                            <a href="#">メールアドレスを忘れた場合</a>
+                        </div>
+                    </div>
+                    
+                    <div class="guest-mode">
+                        ご自分のパソコンでない場合は、シークレット ブラウジング ウィンドウを使用してログインしてください。
+                        <a href="#">詳細</a>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <a href="/accounts/signup/" style="color: #1a73e8; text-decoration: none; font-size: 14px; font-weight: 500;">アカウントを作成</a>
+                        <button type="button" class="btn-next" id="nextBtn">
+                            <div class="spinner"></div>
+                            <span class="btn-text">次へ</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- ステップ2: ログイン方法選択 -->
+                <div class="form-step" id="step2">
+                    <div class="welcome-back">ようこそ</div>
+                    <div class="user-email-display">
+                        <div class="avatar" id="userAvatar">U</div>
+                        <span id="userEmail"></span>
+                    </div>
+                    
+                    <div class="error-message" id="passkeyError" style="display: none;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span id="passkeyErrorText"></span>
+                    </div>
+                    
+                    <div class="login-method-title">ログイン方法を選択してください</div>
+                    
+                    <div class="login-method-options">
+                        <button type="button" class="login-method-btn" id="passkeyBtn" style="display: none;">
+                            <div class="login-method-icon">
+                                <i class="fas fa-fingerprint"></i>
+                            </div>
+                            <div class="login-method-content">
+                                <div class="login-method-label">パスキーを使用</div>
+                                <div class="login-method-desc">生体認証またはセキュリティキー</div>
+                            </div>
+                        </button>
+                        
+                        <button type="button" class="login-method-btn" id="passwordBtn">
+                            <div class="login-method-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div class="login-method-content">
+                                <div class="login-method-label">パスワードを入力</div>
+                                <div class="login-method-desc">Enova IDのパスワード</div>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <div class="form-actions" style="margin-top: 24px;">
+                        <button type="button" class="btn-back" id="backBtn1">戻る</button>
+                        <div></div>
+                    </div>
+                </div>
+                
+                <!-- ステップ3: パスワード入力 -->
+                <div class="form-step" id="step3">
+                    <div class="welcome-back">ようこそ</div>
+                    <div class="user-email-display">
+                        <div class="avatar" id="userAvatar2">U</div>
+                        <span id="userEmail2"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <input type="password" 
+                                   name="password" 
+                                   class="form-control"
+                                   id="id_password"
+                                   placeholder="パスワードを入力"
+                                   required>
+                        </div>
+                        <label class="show-password-label">
+                            <input type="checkbox" id="showPassword">
+                            <span>パスワードを表示します</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-text">
+                        <a href="#">パスワードをお忘れの場合</a>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-back" id="backBtn2">戻る</button>
+                        <button type="submit" class="btn-login" id="loginBtn">
+                            <div class="spinner"></div>
+                            <span class="btn-text">次へ</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+
+        </div>
+    </div>
+
+<script>
+    (function() {
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+        
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        const nextBtn = document.getElementById('nextBtn');
+        const backBtn1 = document.getElementById('backBtn1');
+        const backBtn2 = document.getElementById('backBtn2');
+        const passkeyBtn = document.getElementById('passkeyBtn');
+        const passwordBtn = document.getElementById('passwordBtn');
+        const usernameInput = document.getElementById('id_username');
+        const passwordInput = document.getElementById('id_password');
+        const showPasswordCheckbox = document.getElementById('showPassword');
+        const passkeyError = document.getElementById('passkeyError');
+        const passkeyErrorText = document.getElementById('passkeyErrorText');
+        
+        let hasPasskey = false;
+        let currentUsername = '';
+        let currentUserId = null;
+        
+        // Base64URL変換（改善版）
+        function base64urlToUint8Array(base64url) {
+            // '-' を '+' に、'_' を '/' に置換
+            let base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+            
+            // パディングを追加
+            const pad = base64.length % 4;
+            if (pad === 2) {
+                base64 += '==';
+            } else if (pad === 3) {
+                base64 += '=';
+            }
+            
+            try {
+                const rawData = atob(base64);
+                const outputArray = new Uint8Array(rawData.length);
+                for (let i = 0; i < rawData.length; i++) {
+                    outputArray[i] = rawData.charCodeAt(i);
+                }
+                return outputArray;
+            } catch (e) {
+                console.error('Base64 decode error:', e);
+                console.error('Input:', base64url);
+                throw e;
+            }
+        }
+        
+        function uint8ArrayToBase64url(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            const base64 = btoa(binary);
+            // '+' を '-' に、'/' を '_' に置換し、パディングを削除
+            return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+        }
+        
+        // エラー表示関数
+        function showPasskeyError(message) {
+            passkeyErrorText.textContent = message + ' パスワードでのログインを試してください。';
+            passkeyError.style.display = 'block';
+        }
+        
+        function hidePasskeyError() {
+            passkeyError.style.display = 'none';
+        }
+        
+        nextBtn.addEventListener('click', async function() {
+            const username = usernameInput.value.trim();
+            if (!username) {
+                usernameInput.classList.add('is-invalid');
+                return;
+            }
+            
+            usernameInput.classList.remove('is-invalid');
+            currentUsername = username;
+            nextBtn.disabled = true;
+            nextBtn.classList.add('loading');
+            
+            try {
+                const response = await fetch('/accounts/webauthn/check/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: username })
+                });
+                
+                const data = await response.json();
+                hasPasskey = data.has_passkey || false;
+                currentUserId = data.user_id || null;
+                
+                document.getElementById('userEmail').textContent = username;
+                document.getElementById('userAvatar').textContent = username.slice(0, 1).toUpperCase();
+                document.getElementById('userEmail2').textContent = username;
+                document.getElementById('userAvatar2').textContent = username.slice(0, 1).toUpperCase();
+                
+                if (hasPasskey) {
+                    passkeyBtn.style.display = 'flex';
+                    step1.classList.remove('active');
+                    step2.classList.add('active');
+                    hidePasskeyError();
+                } else {
+                    step1.classList.remove('active');
+                    step3.classList.add('active');
+                    setTimeout(() => passwordInput.focus(), 100);
+                }
+            } catch (error) {
+                console.error('Check passkey error:', error);
+                step1.classList.remove('active');
+                step3.classList.add('active');
+                setTimeout(() => passwordInput.focus(), 100);
+            } finally {
+                nextBtn.disabled = false;
+                nextBtn.classList.remove('loading');
+            }
+        });
+        
+        passkeyBtn.addEventListener('click', async function() {
+            // originalHTMLを最初に定義
+            const originalHTML = '<div class="login-method-icon"><i class="fas fa-fingerprint"></i></div><div class="login-method-content"><div class="login-method-label">パスキーを使用</div><div class="login-method-desc">生体認証またはセキュリティキー</div></div>';
+            
+            try {
+                if (!window.PublicKeyCredential) {
+                    showPasskeyError('お使いのブラウザはパスキーに対応していません。');
+                    return;
+                }
+                
+                this.disabled = true;
+                this.innerHTML = '<div class="login-method-icon"><i class="fas fa-spinner fa-spin"></i></div><div class="login-method-content"><div class="login-method-label">認証中...</div></div>';
+                hidePasskeyError();
+                
+                console.log('Starting passkey authentication for:', currentUsername);
+                
+                // 認証開始
+                const beginResponse = await fetch('/accounts/webauthn/login/begin/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: currentUsername })
+                });
+                
+                const beginData = await beginResponse.json();
+                console.log('Begin response:', beginData);
+                
+                if (!beginData.success) {
+                    throw new Error(beginData.error || '認証の開始に失敗しました');
+                }
+                
+                // publicKeyオプションを準備
+                const publicKeyOptions = beginData.options;
+                console.log('Original challenge:', publicKeyOptions.challenge);
+                
+                publicKeyOptions.challenge = base64urlToUint8Array(publicKeyOptions.challenge);
+                console.log('Converted challenge length:', publicKeyOptions.challenge.length);
+                
+                if (publicKeyOptions.allowCredentials) {
+                    publicKeyOptions.allowCredentials = publicKeyOptions.allowCredentials.map(cred => {
+                        console.log('Converting credential ID:', cred.id);
+                        return {
+                            ...cred,
+                            id: base64urlToUint8Array(cred.id)
+                        };
+                    });
+                }
+                
+                console.log('Calling navigator.credentials.get...');
+                const credential = await navigator.credentials.get({ publicKey: publicKeyOptions });
+                console.log('Credential received:', credential);
+                
+                // レスポンスを準備
+                const credentialData = {
+                    id: credential.id,
+                    rawId: uint8ArrayToBase64url(credential.rawId),
+                    type: credential.type,
+                    response: {
+                        clientDataJSON: uint8ArrayToBase64url(credential.response.clientDataJSON),
+                        authenticatorData: uint8ArrayToBase64url(credential.response.authenticatorData),
+                        signature: uint8ArrayToBase64url(credential.response.signature),
+                    },
+                    user_id: beginData.user_id
+                };
+                
+                if (credential.response.userHandle) {
+                    credentialData.response.userHandle = uint8ArrayToBase64url(credential.response.userHandle);
+                }
+                
+                console.log('Sending credential data:', credentialData);
+                
+                // 認証完了
+                const completeResponse = await fetch('/accounts/webauthn/login/complete/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(credentialData)
+                });
+                
+                const completeData = await completeResponse.json();
+                console.log('Complete response:', completeData);
+                
+                if (completeData.success) {
+                    window.location.href = completeData.redirect_url || '/';
+                } else {
+                    throw new Error(completeData.error || '認証に失敗しました');
+                }
+                
+            } catch (error) {
+                console.error('Passkey error:', error);
+                
+                let errorMessage = 'パスキー認証に失敗しました。';
+                if (error.name === 'NotAllowedError') {
+                    errorMessage = '認証がタイムアウトまたはキャンセルされました。';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                showPasskeyError(errorMessage);
+                this.disabled = false;
+                this.innerHTML = originalHTML;
+            }
+        });
+        
+        passwordBtn.addEventListener('click', function() {
+            step2.classList.remove('active');
+            step3.classList.add('active');
+            hidePasskeyError();
+            setTimeout(() => passwordInput.focus(), 100);
+        });
+        
+        backBtn1.addEventListener('click', function() {
+            step2.classList.remove('active');
+            step1.classList.add('active');
+            hidePasskeyError();
+        });
+        
+        backBtn2.addEventListener('click', function() {
+            step3.classList.remove('active');
+            if (hasPasskey) {
+                step2.classList.add('active');
+            } else {
+                step1.classList.add('active');
+            }
+            passwordInput.value = '';
+        });
+        
+        usernameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                nextBtn.click();
+            }
+        });
+        
+        showPasswordCheckbox.addEventListener('change', function() {
+            passwordInput.type = this.checked ? 'text' : 'password';
+        });
+        
+        document.getElementById('loginForm').addEventListener('submit', function() {
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = true;
+            loginBtn.classList.add('loading');
+        });
+    })();
+</script>
+
+</body>
+</html>

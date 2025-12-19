@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block title %}OAuth接続アプリ - Enova ID{% endblock %}
+
+{% block extra_css %}
+<style>
+    .apps-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    
+    .apps-header {
+        margin-bottom: 32px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #dadce0;
+    }
+    
+    .apps-header h1 {
+        margin: 0 0 8px;
+        font-size: 24px;
+        color: #202124;
+    }
+    
+    .apps-header p {
+        margin: 0;
+        color: #5f6368;
+        font-size: 14px;
+    }
+    
+    .info-box {
+        background-color: #e6f4ea;
+        border-left: 4px solid #34a853;
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #0d652d;
+    }
+    
+    .app-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    
+    .app-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 16px;
+    }
+    
+    .app-info {
+        flex: 1;
+    }
+    
+    .app-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #202124;
+        margin-bottom: 4px;
+    }
+    
+    .app-url {
+        font-size: 12px;
+        color: #5f6368;
+        word-break: break-all;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        background-color: #e6f4ea;
+        color: #0d652d;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    
+    .scopes-section {
+        margin: 16px 0;
+        padding: 12px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+    }
+    
+    .scopes-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: #5f6368;
+        margin-bottom: 8px;
+    }
+    
+    .scopes-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .scope-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        background-color: white;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        font-size: 11px;
+        color: #202124;
+    }
+    
+    .app-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #5f6368;
+        margin-bottom: 16px;
+        border-top: 1px solid #dadce0;
+        padding-top: 12px;
+    }
+    
+    .btn-revoke {
+        background-color: #fce8e6;
+        color: #c5221f;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 12px;
+    }
+    
+    .btn-revoke:hover {
+        background-color: #d93025;
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 8px;
+    }
+    
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+    }
+    
+    .empty-state h2 {
+        font-size: 20px;
+        color: #202124;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="apps-container">
+    <div class="apps-header">
+        <h1><i class="fas fa-plug"></i> OAuth接続アプリ</h1>
+        <p>このアカウントにアクセス権限があるアプリケーション</p>
+    </div>
+    
+    <div class="info-box">
+        <i class="fas fa-info-circle"></i>
+        不要なアプリケーションの権限は、いつでも取り消すことができます
+    </div>
+    
+    {% if apps %}
+        {% for app in apps %}
+        <div class="app-card">
+            <div class="app-header">
+                <div class="app-info">
+                    <div class="app-name">{{ app.application.name }}</div>
+                    <div class="app-url">{{ app.application.redirect_uris|truncatechars:60 }}</div>
+                </div>
+                <span class="status-badge">接続中</span>
+            </div>
+            
+            <div class="scopes-section">
+                <div class="scopes-title">許可されている権限:</div>
+                <div class="scopes-list">
+                    {% for scope in app.scopes_list %}
+                    <span class="scope-badge">{{ scope }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="app-meta">
+                <div>
+                    <i class="fas fa-calendar"></i> 接続: {{ app.granted_at|date:"Y年m月d日 H:i" }}
+                    {% if app.expires_at %}
+                    / 有効期限: {{ app.expires_at|date:"Y年m月d日" }}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <button class="btn-revoke" onclick="revokeAccess({{ app.token_id }})">
+                <i class="fas fa-times-circle"></i> 権限を取り消す
+            </button>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🔌</div>
+            <h2>接続しているアプリケーションはありません</h2>
+            <p style="color: #5f6368;">外部アプリケーションがこのアカウントを使用しようとする際に、ここに表示されます</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    function revokeAccess(tokenId) {
+        if (confirm('このアプリケーションの権限を取り消しますか？')) {
+            fetch(`/accounts/oauth/applications/${tokenId}/revoke/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

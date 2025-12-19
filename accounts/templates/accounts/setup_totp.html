@@ -1,0 +1,392 @@
+{% extends 'base.html' %}
+
+{% block title %}TOTP設定 - Enova ID{% endblock %}
+
+{% block extra_css %}
+<style>
+    .setup-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    
+    .setup-card {
+        background: white;
+        border-radius: 8px;
+        padding: 32px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    
+    .setup-header {
+        text-align: center;
+        margin-bottom: 32px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #dadce0;
+    }
+    
+    .setup-header h1 {
+        margin: 0 0 8px;
+        font-size: 24px;
+        color: #202124;
+    }
+    
+    .setup-header p {
+        margin: 0;
+        color: #5f6368;
+        font-size: 14px;
+    }
+    
+    .step {
+        margin-bottom: 32px;
+    }
+    
+    .step-number {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        background-color: #1a73e8;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 32px;
+        font-weight: 600;
+        margin-right: 12px;
+    }
+    
+    .step-title {
+        display: inline-block;
+        font-size: 16px;
+        font-weight: 600;
+        color: #202124;
+    }
+    
+    .step-content {
+        margin-top: 16px;
+        margin-left: 44px;
+    }
+    
+    .qr-code-container {
+        text-align: center;
+        background-color: #f8f9fa;
+        border: 1px solid #dadce0;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 16px 0;
+    }
+    
+    .qr-code-container img {
+        max-width: 250px;
+        height: auto;
+    }
+    
+    .secret-display {
+        background-color: #f8f9fa;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        padding: 12px 16px;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        word-break: break-all;
+        margin: 12px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .copy-btn {
+        padding: 6px 12px;
+        background: #1a73e8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+    
+    .copy-btn:hover {
+        background: #1765cc;
+    }
+    
+    .token-input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        font-size: 16px;
+        font-family: monospace;
+        box-sizing: border-box;
+        letter-spacing: 4px;
+    }
+    
+    .token-input:focus {
+        outline: none;
+        border-color: #1a73e8;
+        box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+    }
+    
+    .info-box {
+        background-color: #e6f4ea;
+        border-left: 4px solid #34a853;
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin: 12px 0;
+        font-size: 13px;
+        color: #0d652d;
+    }
+    
+    .warning-box {
+        background-color: #fef7e0;
+        border-left: 4px solid #f9ab00;
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin: 12px 0;
+        font-size: 13px;
+        color: #3c4043;
+    }
+    
+    .button-group {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 32px;
+        padding-top: 20px;
+        border-top: 1px solid #dadce0;
+    }
+    
+    .btn {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    
+    .btn-secondary {
+        background-color: white;
+        color: #1a73e8;
+        border: 1px solid #dadce0;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .btn-primary {
+        background-color: #1a73e8;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #1765cc;
+    }
+    
+    .btn-primary:disabled {
+        background-color: #dadce0;
+        color: #80868b;
+        cursor: not-allowed;
+    }
+    
+    .success-message {
+        background-color: #e6f4ea;
+        border: 1px solid #34a853;
+        color: #0d652d;
+        padding: 16px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        display: none;
+    }
+    
+    .success-message.show {
+        display: block;
+    }
+    
+    @media (max-width: 600px) {
+        .setup-card {
+            padding: 20px;
+        }
+        
+        .button-group {
+            flex-direction: column-reverse;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="setup-container">
+    <div class="setup-card">
+        <div class="setup-header">
+            <h1><i class="fas fa-shield-alt"></i> TOTP設定</h1>
+            <p>Google Authenticator で二要素認証を有効化します</p>
+        </div>
+        
+        {% if is_confirmed %}
+            <div class="info-box">
+                <i class="fas fa-check-circle"></i>
+                <strong>✓ TOTP認証は有効です</strong>
+            </div>
+        {% endif %}
+        
+        <div class="success-message" id="successMessage">
+            <i class="fas fa-check-circle"></i>
+            <strong>✓ TOTP認証が有効になりました！</strong><br>
+            <div style="margin-top: 8px;">バックアップコードを安全に保管してください。</div>
+        </div>
+        
+        <!-- ステップ1: QRコード表示 -->
+        <div class="step">
+            <div>
+                <span class="step-number">1</span>
+                <span class="step-title">Google Authenticator をダウンロード</span>
+            </div>
+            <div class="step-content">
+                <p>以下のいずれかのアプリをダウンロードしてください：</p>
+                <ul>
+                    <li><strong>Google Authenticator</strong> (iOS/Android)</li>
+                    <li><strong>Microsoft Authenticator</strong> (iOS/Android)</li>
+                    <li><strong>Authy</strong> (iOS/Android/Web)</li>
+                    <li><strong>FreeOTP</strong> (iOS/Android)</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- ステップ2: QRコードスキャン -->
+        <div class="step">
+            <div>
+                <span class="step-number">2</span>
+                <span class="step-title">QRコードをスキャン</span>
+            </div>
+            <div class="step-content">
+                <p>アプリを開いて以下のQRコードをスキャンしてください：</p>
+                <div class="qr-code-container">
+                    <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+                </div>
+                <p style="font-size: 12px; color: #5f6368;">
+                    QRコードがスキャンできない場合は、以下のシークレットキーを手動で入力してください：
+                </p>
+                <div class="secret-display">
+                    <span id="secretKey">{{ secret }}</span>
+                    <button class="copy-btn" onclick="copySecret()">
+                        <i class="fas fa-copy"></i> コピー
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ステップ3: トークン確認 -->
+        <div class="step">
+            <div>
+                <span class="step-number">3</span>
+                <span class="step-title">認証コードを入力</span>
+            </div>
+            <div class="step-content">
+                <p>アプリに表示されている6桁のコードを入力して確認してください：</p>
+                <input type="text" id="tokenInput" class="token-input" placeholder="000000" maxlength="6" inputmode="numeric">
+            </div>
+        </div>
+        
+        <!-- 警告 -->
+        <div class="warning-box">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>重要:</strong> このシークレットキーは安全な場所に保管してください。デバイスを失った場合、バックアップコードが唯一の方法です。
+        </div>
+        
+        <div class="button-group">
+            <a href="/accounts/settings/" class="btn btn-secondary">キャンセル</a>
+            <button onclick="verifyToken()" class="btn btn-primary">
+                <i class="fas fa-check"></i> 確認
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- バックアップコード表示モーダル -->
+<div id="backupModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 32px; border-radius: 8px; width: 90%; max-width: 500px;">
+        <h2 style="margin-top: 0; color: #202124;">
+            <i class="fas fa-key"></i> バックアップコード
+        </h2>
+        <p style="color: #5f6368;">以下のコードを安全に保管してください。紛失した場合、アカウントにアクセスできなくなります。</p>
+        
+        <div style="background-color: #f8f9fa; border: 1px solid #dadce0; border-radius: 4px; padding: 16px; margin: 16px 0; max-height: 300px; overflow-y: auto;">
+            <div id="backupCodes" style="font-family: monospace; font-size: 12px; line-height: 2;"></div>
+        </div>
+        
+        <button onclick="downloadBackupCodes()" style="background: #1a73e8; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 8px;">
+            <i class="fas fa-download"></i> ダウンロード
+        </button>
+        <button onclick="copyBackupCodes()" style="background: white; color: #1a73e8; padding: 8px 16px; border: 1px solid #dadce0; border-radius: 4px; cursor: pointer; margin-right: 8px;">
+            <i class="fas fa-copy"></i> コピー
+        </button>
+        <button onclick="closeBackupModal()" style="background: white; color: #1a73e8; padding: 8px 16px; border: 1px solid #dadce0; border-radius: 4px; cursor: pointer;">
+            <i class="fas fa-check"></i> 完了
+        </button>
+    </div>
+</div>
+
+<script>
+    function copySecret() {
+        navigator.clipboard.writeText('{{ secret }}').then(() => {
+            alert('コピーしました');
+        });
+    }
+    
+    function verifyToken() {
+        const token = document.getElementById('tokenInput').value.trim();
+        
+        if (token.length !== 6) {
+            alert('6桁のコードを入力してください');
+            return;
+        }
+        
+        fetch('{% url "accounts:setup_totp" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('successMessage').classList.add('show');
+                
+                // バックアップコード表示
+                const codesHtml = data.backup_codes.map(code => `<div>${code}</div>`).join('');
+                document.getElementById('backupCodes').innerHTML = codesHtml;
+                document.getElementById('backupModal').style.display = 'flex';
+                
+                // フォーム非表示
+                document.querySelectorAll('.step, .warning-box, .button-group').forEach(el => {
+                    el.style.display = 'none';
+                });
+            } else {
+                alert('エラー: ' + data.error);
+            }
+        });
+    }
+    
+    function closeBackupModal() {
+        window.location.href = '/accounts/settings/';
+    }
+    
+    function downloadBackupCodes() {
+        const codes = document.getElementById('backupCodes').innerText;
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(codes));
+        element.setAttribute('download', 'backup-codes.txt');
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+    
+    function copyBackupCodes() {
+        navigator.clipboard.writeText(document.getElementById('backupCodes').innerText).then(() => {
+            alert('コピーしました');
+        });
+    }
+</script>
+{% endblock %}

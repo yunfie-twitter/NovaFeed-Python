@@ -1,0 +1,528 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <title>{% block title %}E-nova ID{% endblock %}</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        :root {
+            --note-green: #41c98e;
+            --note-green-hover: #2fb67c;
+            --note-text: #333333;
+            --note-text-light: #6b6b6b;
+            --note-border: #e8e8e8;
+            --note-bg: #fafafa;
+            --note-white: #ffffff;
+            --note-shadow: rgba(0, 0, 0, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--note-bg);
+            color: var(--note-text);
+            line-height: 1.8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* ヘッダー */
+        .note-header {
+            background-color: var(--note-white);
+            border-bottom: 1px solid var(--note-border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px var(--note-shadow);
+        }
+        
+        .note-header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+        
+        .note-logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--note-text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .note-logo:hover {
+            color: var(--note-green);
+        }
+        
+        .note-nav {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .note-nav a {
+            color: var(--note-text-light);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .note-nav a:hover {
+            color: var(--note-green);
+        }
+        
+        /* ユーザーメニュー */
+        .note-user-menu {
+            position: relative;
+        }
+        
+        .note-avatar-button {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px;
+            border-radius: 50px;
+            transition: background-color 0.2s;
+        }
+        
+        .note-avatar-button:hover {
+            background-color: var(--note-bg);
+        }
+        
+        .note-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            overflow: hidden;
+            border: 2px solid var(--note-border);
+        }
+        
+        .note-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .note-avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--note-green), #57d9a3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .note-avatar:hover {
+            transform: scale(1.05);
+        }
+        
+        /* ドロップダウンメニュー */
+        .note-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background-color: var(--note-white);
+            border: 1px solid var(--note-border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--note-shadow);
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s;
+            z-index: 1001;
+        }
+        
+        .note-user-menu:hover .note-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .note-dropdown-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--note-border);
+        }
+        
+        .note-dropdown-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--note-text);
+            margin-bottom: 4px;
+        }
+        
+        .note-dropdown-id {
+            font-size: 12px;
+            color: var(--note-text-light);
+        }
+        
+        .note-dropdown-menu {
+            padding: 8px 0;
+        }
+        
+        .note-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            color: var(--note-text);
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .note-dropdown-item:hover {
+            background-color: var(--note-bg);
+        }
+        
+        .note-dropdown-item i {
+            width: 16px;
+            text-align: center;
+            color: var(--note-text-light);
+        }
+        
+        .note-dropdown-divider {
+            height: 1px;
+            background-color: var(--note-border);
+            margin: 8px 0;
+        }
+        
+        .note-button {
+            background-color: var(--note-green);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .note-button:hover {
+            background-color: var(--note-green-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px var(--note-shadow);
+        }
+        
+        .note-button-outline {
+            background-color: transparent;
+            color: var(--note-text);
+            border: 1px solid var(--note-border);
+        }
+        
+        .note-button-outline:hover {
+            background-color: var(--note-bg);
+            transform: translateY(-1px);
+        }
+        
+        /* メインコンテンツ */
+        main {
+            flex: 1;
+            max-width: 800px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+        
+        /* メッセージ */
+        .note-messages {
+            margin-bottom: 24px;
+        }
+        
+        .note-message {
+            background-color: var(--note-white);
+            border-left: 4px solid var(--note-green);
+            padding: 16px 20px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px var(--note-shadow);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .note-message.error {
+            border-left-color: #f85149;
+        }
+        
+        .note-message.warning {
+            border-left-color: #f0ad4e;
+        }
+        
+        .note-message.info {
+            border-left-color: #5bc0de;
+        }
+        
+        .note-message.success {
+            border-left-color: var(--note-green);
+        }
+        
+        .note-message i {
+            font-size: 18px;
+            color: var(--note-green);
+        }
+        
+        .note-message.error i {
+            color: #f85149;
+        }
+        
+        .note-message.warning i {
+            color: #f0ad4e;
+        }
+        
+        .note-message.info i {
+            color: #5bc0de;
+        }
+        
+        /* カード */
+        .note-card {
+            background-color: var(--note-white);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--note-shadow);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        
+        .note-card-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--note-border);
+        }
+        
+        .note-card-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--note-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .note-card-body {
+            padding: 32px 24px;
+        }
+        
+        /* フッター */
+        .note-footer {
+            background-color: var(--note-white);
+            border-top: 1px solid var(--note-border);
+            padding: 40px 0;
+            margin-top: 60px;
+        }
+        
+        .note-footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .note-footer-text {
+            color: var(--note-text-light);
+            font-size: 14px;
+        }
+        
+        .note-footer-links {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .note-footer-links a {
+            color: var(--note-text-light);
+            font-size: 20px;
+            transition: color 0.2s;
+        }
+        
+        .note-footer-links a:hover {
+            color: var(--note-green);
+        }
+        
+        /* レスポンシブ */
+        @media (max-width: 768px) {
+            .note-header-container {
+                padding: 0 16px;
+            }
+            
+            .note-nav {
+                gap: 16px;
+            }
+            
+            .note-nav a span {
+                display: none;
+            }
+            
+            main {
+                padding: 0 16px;
+                margin: 24px auto;
+            }
+            
+            .note-footer-container {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="note-header">
+        <div class="note-header-container">
+            <a href="/" class="note-logo">
+
+                <span>E-nova ID</span>
+            </a>
+            
+            <nav class="note-nav">
+                {% if user.is_authenticated %}
+                    <a href="/">
+                        <i class="fas fa-home"></i>
+                        <span>ホーム</span>
+                    </a>
+                    <a href="{% url 'profile' %}">
+                        <i class="fas fa-user"></i>
+                        <span>プロフィール</span>
+                    </a>
+                    
+                    <!-- ユーザーメニュー -->
+                    <div class="note-user-menu">
+                        <div class="note-avatar-button">
+                            <div class="note-avatar">
+                                {% if user.profile_image %}
+                                    <img src="{{ user.profile_image.url }}" alt="{{ user.get_display_name }}">
+                                {% else %}
+                                    <div class="note-avatar-placeholder">
+                                        {{ user.get_display_name|slice:":1"|upper }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- ドロップダウンメニュー -->
+                        <div class="note-dropdown">
+                            <div class="note-dropdown-header">
+                                <div class="note-dropdown-name">{{ user.get_display_name }}</div>
+                                <div class="note-dropdown-id">@{{ user.username }}</div>
+                            </div>
+                            <div class="note-dropdown-menu">
+                                <a href="{% url 'profile' %}" class="note-dropdown-item">
+                                    <i class="fas fa-user"></i>
+                                    <span>プロフィール</span>
+                                </a>
+                                <a href="{% url 'profile_edit' %}" class="note-dropdown-item">
+                                    <i class="fas fa-edit"></i>
+                                    <span>プロフィール編集</span>
+                                </a>
+                                <a href="{% url 'password_change' %}" class="note-dropdown-item">
+                                    <i class="fas fa-key"></i>
+                                    <span>パスワード変更</span>
+                                </a>
+                                <div class="note-dropdown-divider"></div>
+                                <a href="{% url 'logout' %}" class="note-dropdown-item">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>ログアウト</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="note-button note-button-outline">
+                        ログイン
+                    </a>
+                    <a href="{% url 'signup' %}" class="note-button">
+                        新規登録
+                    </a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <!-- メッセージ表示 -->
+    {% if messages %}
+        <div style="max-width: 800px; margin: 20px auto; padding: 0 24px;">
+            <div class="note-messages">
+                {% for message in messages %}
+                    <div class="note-message {% if message.tags %}{{ message.tags }}{% endif %}">
+                        {% if 'error' in message.tags or 'danger' in message.tags %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% elif 'success' in message.tags %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif 'warning' in message.tags %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                        {% elif 'info' in message.tags %}
+                            <i class="fas fa-info-circle"></i>
+                        {% else %}
+                            <i class="fas fa-check-circle"></i>
+                        {% endif %}
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- メインコンテンツ -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- フッター -->
+    <footer class="note-footer">
+        <div class="note-footer-container">
+            <div class="note-footer-text">
+                © 2025 マイアプリ. All rights reserved.
+            </div>
+            <div class="note-footer-links">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

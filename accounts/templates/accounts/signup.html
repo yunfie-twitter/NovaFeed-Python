@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アカウント作成 - Enova ID</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .signup-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+        }
+        
+        .signup-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            padding: 48px 40px 36px;
+        }
+        
+        .google-logo {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .google-logo-text {
+            font-size: 24px;
+            font-weight: 400;
+            color: #5f6368;
+            letter-spacing: -0.5px;
+        }
+        
+        .signup-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 400;
+            color: #202124;
+            margin: 0 0 8px;
+        }
+        
+        .signup-subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: #5f6368;
+            margin-bottom: 32px;
+        }
+        
+        .form-step {
+            display: none;
+        }
+        
+        .form-step.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #202124;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.2s;
+            background-color: white;
+        }
+        
+        .form-control:hover {
+            border-color: #80868b;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+        }
+        
+        .form-control.is-invalid {
+            border-color: #d93025;
+        }
+        
+        .form-control.is-invalid:focus {
+            box-shadow: 0 0 0 2px rgba(217, 48, 37, 0.1);
+        }
+        
+        .form-text {
+            font-size: 12px;
+            color: #5f6368;
+            margin-top: 6px;
+        }
+        
+        .invalid-feedback {
+            color: #d93025;
+            font-size: 12px;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 32px;
+            gap: 16px;
+        }
+        
+        .btn-back {
+            padding: 10px 24px;
+            background-color: transparent;
+            color: #1a73e8;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-back:hover {
+            background-color: rgba(26, 115, 232, 0.04);
+        }
+        
+        .btn-next,
+        .btn-signup {
+            padding: 10px 24px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-next:hover,
+        .btn-signup:hover {
+            background-color: #1765cc;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .btn-next:disabled,
+        .btn-signup:disabled {
+            background-color: #dadce0;
+            color: #80868b;
+            cursor: not-allowed;
+        }
+        
+        .spinner {
+            display: none;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        .btn-next.loading .spinner,
+        .btn-signup.loading .spinner {
+            display: block;
+        }
+        
+        .btn-next.loading .btn-text,
+        .btn-signup.loading .btn-text {
+            display: none;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .footer-links {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #dadce0;
+            font-size: 14px;
+            color: #5f6368;
+        }
+        
+        .footer-links a {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-alert {
+            background-color: #fef7e0;
+            border-left: 4px solid #f9ab00;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #3c4043;
+        }
+        
+        .error-alert i {
+            color: #f9ab00;
+            margin-right: 8px;
+        }
+        
+        @media (max-width: 576px) {
+            .signup-card {
+                padding: 32px 24px 24px;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .form-actions {
+                flex-direction: column-reverse;
+            }
+            
+            .btn-back,
+            .btn-next,
+            .btn-signup {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-card">
+            <div class="google-logo">
+                <div class="google-logo-text">Enova ID</div>
+            </div>
+            
+            <form method="post" id="signupForm" novalidate>
+                {% csrf_token %}
+                
+                <!-- エラーメッセージ -->
+                {% if form.non_field_errors %}
+                    <div class="error-alert">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- ステップ1: ユーザー名とメール -->
+                <div class="form-step active" id="step1">
+                    <h1 class="signup-title">アカウント作成</h1>
+                    <p class="signup-subtitle">ユーザー名を作成してください</p>
+                    
+                    <div class="form-group">
+                        <label for="id_username" class="form-label">
+                            ユーザー名
+                        </label>
+                        {% if form.username.errors %}
+                            {{ form.username }}
+                            <div class="invalid-feedback">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>{{ form.username.errors.0 }}</span>
+                            </div>
+                        {% else %}
+                            {{ form.username }}
+                        {% endif %}
+                        <div class="form-text">
+                            英数字、@、.、+、-、_のみ使用可能です
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_email" class="form-label">
+                            メールアドレス
+                        </label>
+                        {% if form.email.errors %}
+                            {{ form.email }}
+                            <div class="invalid-feedback">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>{{ form.email.errors.0 }}</span>
+                            </div>
+                        {% else %}
+                            {{ form.email }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-actions">
+                        <a href="/accounts/login/" class="btn-back">キャンセル</a>
+                        <button type="button" class="btn-next" id="nextBtn">
+                            <div class="spinner"></div>
+                            <span class="btn-text">次へ</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- ステップ2: パスワード -->
+                <div class="form-step" id="step2">
+                    <h1 class="signup-title">パスワード作成</h1>
+                    <p class="signup-subtitle">キー、数字、大文字などを含むセキュアなパスワードを作成してください</p>
+                    
+                    <div class="form-group">
+                        <label for="id_password1" class="form-label">
+                            パスワード
+                        </label>
+                        {% if form.password1.errors %}
+                            {{ form.password1 }}
+                            <div class="invalid-feedback">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>{{ form.password1.errors.0 }}</span>
+                            </div>
+                        {% else %}
+                            {{ form.password1 }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_password2" class="form-label">
+                            パスワード（確認）
+                        </label>
+                        {% if form.password2.errors %}
+                            {{ form.password2 }}
+                            <div class="invalid-feedback">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>{{ form.password2.errors.0 }}</span>
+                            </div>
+                        {% else %}
+                            {{ form.password2 }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-back" id="backBtn">戻る</button>
+                        <button type="submit" class="btn-signup" id="signupBtn">
+                            <div class="spinner"></div>
+                            <span class="btn-text">作成</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- フッター -->
+            <div class="footer-links">
+                既にアカウントをお持ちの方は<a href="/accounts/login/">ここからログイン</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const nextBtn = document.getElementById('nextBtn');
+            const backBtn = document.getElementById('backBtn');
+            const signupBtn = document.getElementById('signupBtn');
+            
+            const usernameInput = document.getElementById('id_username');
+            const emailInput = document.getElementById('id_email');
+            const password1Input = document.getElementById('id_password1');
+            const password2Input = document.getElementById('id_password2');
+            
+            // ステップ1から2へ
+            nextBtn.addEventListener('click', function() {
+                const username = usernameInput.value.trim();
+                const email = emailInput.value.trim();
+                
+                if (!username) {
+                    usernameInput.classList.add('is-invalid');
+                    return;
+                }
+                if (!email) {
+                    emailInput.classList.add('is-invalid');
+                    return;
+                }
+                
+                usernameInput.classList.remove('is-invalid');
+                emailInput.classList.remove('is-invalid');
+                
+                step1.classList.remove('active');
+                step2.classList.add('active');
+                password1Input.focus();
+            });
+            
+            // 戻るボタン
+            backBtn.addEventListener('click', function() {
+                step2.classList.remove('active');
+                step1.classList.add('active');
+                usernameInput.focus();
+            });
+            
+            // エンターキー処理
+            usernameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    emailInput.focus();
+                }
+            });
+            
+            emailInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    nextBtn.click();
+                }
+            });
+            
+            password1Input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    password2Input.focus();
+                }
+            });
+            
+            password2Input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('signupForm').submit();
+                }
+            });
+            
+            // フォーム送信時のローディング
+            document.getElementById('signupForm').addEventListener('submit', function() {
+                signupBtn.disabled = true;
+                signupBtn.classList.add('loading');
+            });
+        })();
+    </script>
+    <style>
+        .form-control {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: inherit;
+    transition: all 0.2s;
+    background-color: white;
+}
+    </style>
+</body>
+</html>

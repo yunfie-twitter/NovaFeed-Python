@@ -1,0 +1,869 @@
+{% extends 'base.html' %}
+
+{% block title %}ダッシュボード - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .dashboard-welcome {
+        background: linear-gradient(135deg, var(--note-green), #57d9a3);
+        border-radius: 12px;
+        padding: 40px;
+        color: white;
+        margin-bottom: 32px;
+        box-shadow: 0 4px 20px rgba(65, 201, 142, 0.3);
+    }
+    
+    .dashboard-welcome h1 {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    
+    .dashboard-welcome p {
+        font-size: 16px;
+        opacity: 0.95;
+        margin: 0;
+    }
+    
+    .dashboard-welcome .user-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-top: 20px;
+    }
+    
+    .dashboard-welcome .user-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        object-fit: cover;
+    }
+    
+    .dashboard-welcome .user-avatar-placeholder {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .dashboard-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 32px;
+    }
+    
+    .stat-card {
+        background-color: var(--note-white);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px var(--note-shadow);
+        transition: all 0.3s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px var(--note-shadow);
+    }
+    
+    .stat-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+    
+    .stat-card-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--note-text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+    
+    .stat-card-icon.green {
+        background-color: rgba(65, 201, 142, 0.1);
+        color: var(--note-green);
+    }
+    
+    .stat-card-icon.blue {
+        background-color: rgba(91, 192, 222, 0.1);
+        color: #5bc0de;
+    }
+    
+    .stat-card-icon.orange {
+        background-color: rgba(240, 173, 78, 0.1);
+        color: #f0ad4e;
+    }
+    
+    .stat-card-value {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--note-text);
+        margin-bottom: 4px;
+    }
+    
+    .stat-card-label {
+        font-size: 14px;
+        color: var(--note-text-light);
+    }
+    
+    .dashboard-section {
+        margin-bottom: 32px;
+    }
+    
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    
+    .section-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--note-text);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .section-title i {
+        color: var(--note-green);
+    }
+    
+    .data-table {
+        background-color: var(--note-white);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px var(--note-shadow);
+        overflow: hidden;
+    }
+    
+    .data-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .data-table thead {
+        background-color: var(--note-bg);
+    }
+    
+    .data-table th {
+        padding: 16px 20px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--note-text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .data-table td {
+        padding: 16px 20px;
+        border-top: 1px solid var(--note-border);
+        font-size: 14px;
+        color: var(--note-text);
+    }
+    
+    .data-table tr:hover {
+        background-color: var(--note-bg);
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .badge-success {
+        background-color: rgba(65, 201, 142, 0.1);
+        color: var(--note-green);
+    }
+    
+    .badge-warning {
+        background-color: rgba(240, 173, 78, 0.1);
+        color: #f0ad4e;
+    }
+    
+    .badge-danger {
+        background-color: rgba(248, 81, 73, 0.1);
+        color: #f85149;
+    }
+    
+    .badge-current {
+        background-color: rgba(65, 201, 142, 0.2);
+        color: var(--note-green);
+        font-weight: 700;
+    }
+    
+    .btn-action {
+        padding: 6px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+    }
+    
+    .btn-action.btn-primary {
+        background-color: var(--note-green);
+        color: white;
+    }
+    
+    .btn-action.btn-primary:hover {
+        background-color: var(--note-green-hover);
+    }
+    
+    .btn-action.btn-danger {
+        background-color: #f85149;
+        color: white;
+    }
+    
+    .btn-action.btn-danger:hover {
+        background-color: #d73a49;
+    }
+    
+    .btn-action.btn-secondary {
+        background-color: var(--note-bg);
+        color: var(--note-text);
+        border: 1px solid var(--note-border);
+    }
+    
+    .btn-action.btn-secondary:hover {
+        background-color: var(--note-border);
+    }
+    
+    .btn-action:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .webauthn-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .webauthn-card {
+        background-color: var(--note-white);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px var(--note-shadow);
+        transition: all 0.3s;
+    }
+    
+    .webauthn-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--note-shadow);
+    }
+    
+    .webauthn-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .webauthn-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--note-green), #57d9a3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+    }
+    
+    .webauthn-card-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--note-text);
+    }
+    
+    .webauthn-card-meta {
+        font-size: 13px;
+        color: var(--note-text-light);
+        margin-bottom: 16px;
+    }
+    
+    .webauthn-card-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--note-text-light);
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.3;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-welcome {
+            padding: 24px;
+        }
+        
+        .dashboard-welcome h1 {
+            font-size: 24px;
+        }
+        
+        .dashboard-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .data-table {
+            overflow-x: auto;
+        }
+        
+        .webauthn-cards {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- ウェルカムセクション -->
+    <div class="dashboard-welcome">
+        <div class="user-info">
+            {% if user.profile_image %}
+                <img src="{{ user.profile_image.url }}" alt="{{ user.get_display_name }}" class="user-avatar">
+            {% else %}
+                <div class="user-avatar-placeholder">
+                    <i class="fas fa-user"></i>
+                </div>
+            {% endif %}
+            <div>
+                <h1>おかえりなさい、{{ user.get_display_name }}さん</h1>
+                {% if last_login %}
+                <p>最終ログイン: {{ last_login.timestamp|date:"Y年m月d日 H:i" }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- 統計カード -->
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-title">アクティブセッション</span>
+                <div class="stat-card-icon green">
+                    <i class="fas fa-desktop"></i>
+                </div>
+            </div>
+            <div class="stat-card-value">{{ active_sessions_count }}</div>
+            <div class="stat-card-label">現在のデバイス数</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-title">ログイン回数</span>
+                <div class="stat-card-icon blue">
+                    <i class="fas fa-sign-in-alt"></i>
+                </div>
+            </div>
+            <div class="stat-card-value">{{ login_count }}</div>
+            <div class="stat-card-label">過去30日間</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-title">パスキー</span>
+                <div class="stat-card-icon orange">
+                    <i class="fas fa-key"></i>
+                </div>
+            </div>
+            <div class="stat-card-value">{{ passkey_count }}</div>
+            <div class="stat-card-label">登録済みデバイス</div>
+        </div>
+    </div>
+    
+    <!-- アクティブセッション -->
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-desktop"></i>
+                アクティブセッション
+            </h2>
+        </div>
+        
+        {% if active_sessions %}
+        <div class="data-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>デバイス</th>
+                        <th>場所</th>
+                        <th>IPアドレス</th>
+                        <th>最終アクセス</th>
+                        <th>ステータス</th>
+                        <th>アクション</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in active_sessions %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                {% if session.device_type == 'mobile' %}
+                                    <i class="fas fa-mobile-alt" style="color: var(--note-green); font-size: 20px;"></i>
+                                {% elif session.device_type == 'tablet' %}
+                                    <i class="fas fa-tablet-alt" style="color: var(--note-green); font-size: 20px;"></i>
+                                {% else %}
+                                    <i class="fas fa-laptop" style="color: var(--note-green); font-size: 20px;"></i>
+                                {% endif %}
+                                <div>
+                                    <div style="font-weight: 600;">{{ session.device_name }}</div>
+                                    <div style="font-size: 12px; color: var(--note-text-light);">{{ session.browser }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <i class="fas fa-map-marker-alt" style="color: var(--note-text-light); margin-right: 6px;"></i>
+                            {{ session.location_city }}, {{ session.location_country }}
+                        </td>
+                        <td>{{ session.ip_address }}</td>
+                        <td>{{ session.last_activity|timesince }}前</td>
+                        <td>
+                            {% if session.is_current %}
+                                <span class="badge badge-current">現在のセッション</span>
+                            {% else %}
+                                <span class="badge badge-success">アクティブ</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.is_current %}
+                                <button class="btn-action btn-secondary" disabled>
+                                    <i class="fas fa-check"></i>
+                                    このデバイス
+                                </button>
+                            {% else %}
+                                <button class="btn-action btn-danger logout-session-btn" data-session-key="{{ session.session_key }}">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    ログアウト
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-desktop"></i>
+            <p>アクティブなセッションはありません</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- WebAuthn (パスキー) -->
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-fingerprint"></i>
+                パスキー（WebAuthn）
+            </h2>
+            <button class="btn-action btn-primary" id="addPasskeyBtn">
+                <i class="fas fa-plus"></i>
+                新しいパスキーを追加
+            </button>
+        </div>
+        
+        {% if passkeys %}
+        <div class="webauthn-cards">
+            {% for passkey in passkeys %}
+            <div class="webauthn-card">
+                <div class="webauthn-card-header">
+                    <div class="webauthn-icon">
+                        {% if passkey.device_type == 'platform' %}
+                            <i class="fas fa-fingerprint"></i>
+                        {% else %}
+                            <i class="fas fa-key"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="webauthn-card-title">{{ passkey.device_name }}</div>
+                    </div>
+                </div>
+                <div class="webauthn-card-meta">
+                    <div style="margin-bottom: 4px;">
+                        <i class="fas fa-calendar-plus" style="margin-right: 6px;"></i>
+                        登録日: {{ passkey.created_at|date:"Y年m月d日" }}
+                    </div>
+                    <div>
+                        <i class="fas fa-clock" style="margin-right: 6px;"></i>
+                        最終使用: {% if passkey.last_used %}{{ passkey.last_used|date:"Y年m月d日" }}{% else %}未使用{% endif %}
+                    </div>
+                </div>
+                <div class="webauthn-card-actions">
+                    <button class="btn-action btn-secondary rename-passkey-btn" data-passkey-id="{{ passkey.id }}" data-current-name="{{ passkey.device_name }}">
+                        <i class="fas fa-edit"></i>
+                        名前変更
+                    </button>
+                    <button class="btn-action btn-danger delete-passkey-btn" data-passkey-id="{{ passkey.id }}" data-passkey-name="{{ passkey.device_name }}">
+                        <i class="fas fa-trash"></i>
+                        削除
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-key"></i>
+            <p>登録されたパスキーはありません</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- ログイン履歴 -->
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-history"></i>
+                最近のログイン履歴
+            </h2>
+        </div>
+        
+        {% if login_history %}
+        <div class="data-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>日時</th>
+                        <th>デバイス</th>
+                        <th>場所</th>
+                        <th>IPアドレス</th>
+                        <th>ステータス</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for history in login_history %}
+                    <tr>
+                        <td>{{ history.timestamp|date:"Y年m月d日 H:i" }}</td>
+                        <td>
+                            {% if history.device_type == 'mobile' %}
+                                <i class="fas fa-mobile-alt" style="margin-right: 8px; color: var(--note-green);"></i>
+                            {% elif history.device_type == 'tablet' %}
+                                <i class="fas fa-tablet-alt" style="margin-right: 8px; color: var(--note-green);"></i>
+                            {% else %}
+                                <i class="fas fa-laptop" style="margin-right: 8px; color: var(--note-green);"></i>
+                            {% endif %}
+                            {{ history.device_name }}
+                        </td>
+                        <td>{{ history.location_city }}, {{ history.location_country }}</td>
+                        <td>{{ history.ip_address }}</td>
+                        <td>
+                            {% if history.status == 'success' %}
+                                <span class="badge badge-success">成功</span>
+                            {% else %}
+                                <span class="badge badge-danger">失敗</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-history"></i>
+            <p>ログイン履歴はありません</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // CSRFトークン取得
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+    
+    // セッションログアウト
+    document.querySelectorAll('.logout-session-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const sessionKey = this.dataset.sessionKey;
+            
+            if (confirm('このセッションをログアウトしますか？')) {
+                fetch('{% url "logout_session" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `session_key=${sessionKey}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.error || 'エラーが発生しました');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('エラーが発生しました');
+                });
+            }
+        });
+    });
+    
+    // パスキー削除
+    document.querySelectorAll('.delete-passkey-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const passkeyId = this.dataset.passkeyId;
+            const passkeyName = this.dataset.passkeyName;
+            
+            if (confirm(`「${passkeyName}」を削除しますか？`)) {
+                fetch('{% url "delete_passkey" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `passkey_id=${passkeyId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.error || 'エラーが発生しました');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('エラーが発生しました');
+                });
+            }
+        });
+    });
+    
+    // パスキー名前変更
+    document.querySelectorAll('.rename-passkey-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const passkeyId = this.dataset.passkeyId;
+            const currentName = this.dataset.currentName;
+            const newName = prompt('新しい名前を入力してください:', currentName);
+            
+            if (newName && newName !== currentName) {
+                fetch('{% url "rename_passkey" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `passkey_id=${passkeyId}&new_name=${encodeURIComponent(newName)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.error || 'エラーが発生しました');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('エラーが発生しました');
+                });
+            }
+        });
+    });
+    
+// パスキー追加
+document.getElementById('addPasskeyBtn')?.addEventListener('click', async function() {
+    try {
+        // WebAuthn APIをチェック
+        if (!window.PublicKeyCredential) {
+            alert('お使いのブラウザはパスキーに対応していません');
+            return;
+        }
+        
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 登録中...';
+        
+        // デバイス名を入力
+        const deviceName = prompt('パスキーの名前を入力してください:', 'Windows Hello');
+        if (!deviceName) {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-plus"></i> 新しいパスキーを追加';
+            return;
+        }
+        
+        // 登録開始
+        const beginResponse = await fetch('{% url "webauthn_register_begin" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        const beginData = await beginResponse.json();
+        console.log('Begin response:', beginData);
+        
+        if (!beginData.success) {
+            throw new Error(beginData.error || '登録の開始に失敗しました');
+        }
+        
+        // レスポンスの構造を確認
+        if (!beginData.options) {
+            throw new Error('サーバーからのレスポンスが不正です');
+        }
+        
+        // publicKeyオブジェクトを準備
+        const publicKeyCredentialCreationOptions = beginData.options;
+        
+        // Base64URLデコード用のヘルパー関数
+        function base64urlToUint8Array(base64url) {
+            const padding = '='.repeat((4 - base64url.length % 4) % 4);
+            const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/') + padding;
+            const rawData = atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+        
+        // challengeをUint8Arrayに変換
+        publicKeyCredentialCreationOptions.challenge = base64urlToUint8Array(
+            publicKeyCredentialCreationOptions.challenge
+        );
+        
+        // user.idをUint8Arrayに変換
+        publicKeyCredentialCreationOptions.user.id = base64urlToUint8Array(
+            publicKeyCredentialCreationOptions.user.id
+        );
+        
+        // excludeCredentialsがある場合、各idをUint8Arrayに変換
+        if (publicKeyCredentialCreationOptions.excludeCredentials) {
+            publicKeyCredentialCreationOptions.excludeCredentials = 
+                publicKeyCredentialCreationOptions.excludeCredentials.map(cred => ({
+                    ...cred,
+                    id: base64urlToUint8Array(cred.id)
+                }));
+        }
+        
+        console.log('Prepared options:', publicKeyCredentialCreationOptions);
+        
+        // 認証器を呼び出し
+        const credential = await navigator.credentials.create({
+            publicKey: publicKeyCredentialCreationOptions
+        });
+        
+        console.log('Credential created:', credential);
+        
+        // Base64URLエンコード用のヘルパー関数
+        function uint8ArrayToBase64url(array) {
+            const bytes = new Uint8Array(array);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary)
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=/g, '');
+        }
+        
+        // レスポンスを準備
+        const credentialData = {
+            id: credential.id,
+            rawId: uint8ArrayToBase64url(credential.rawId),
+            type: credential.type,
+            response: {
+                clientDataJSON: uint8ArrayToBase64url(credential.response.clientDataJSON),
+                attestationObject: uint8ArrayToBase64url(credential.response.attestationObject),
+            },
+            device_name: deviceName,
+        };
+        
+        console.log('Sending credential data:', credentialData);
+        
+        // 登録完了
+        const completeResponse = await fetch('{% url "webauthn_register_complete" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(credentialData),
+        });
+        
+        const completeData = await completeResponse.json();
+        console.log('Complete response:', completeData);
+        
+        if (completeData.success) {
+            alert('パスキーが登録されました');
+            location.reload();
+        } else {
+            throw new Error(completeData.error || '登録の完了に失敗しました');
+        }
+        
+    } catch (error) {
+        console.error('Passkey registration error:', error);
+        alert('パスキーの登録に失敗しました: ' + error.message);
+    } finally {
+        this.disabled = false;
+        this.innerHTML = '<i class="fas fa-plus"></i> 新しいパスキーを追加';
+    }
+});
+
+
+</script>
+{% endblock %}

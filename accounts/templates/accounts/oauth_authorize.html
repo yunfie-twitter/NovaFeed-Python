@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アクセス許可 - Enova ID</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .authorize-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+        }
+        
+        .authorize-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            padding: 48px 40px 36px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: 400;
+            color: #5f6368;
+            letter-spacing: -0.5px;
+        }
+        
+        .title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 400;
+            color: #202124;
+            margin: 0 0 8px;
+        }
+        
+        .user-info {
+            text-align: center;
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .client-info {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            border-left: 4px solid #1a73e8;
+        }
+        
+        .client-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #202124;
+            margin-bottom: 4px;
+        }
+        
+        .client-url {
+            font-size: 12px;
+            color: #5f6368;
+            word-break: break-all;
+        }
+        
+        .scopes-section {
+            margin-bottom: 24px;
+        }
+        
+        .scopes-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #202124;
+            margin-bottom: 12px;
+        }
+        
+        .scopes-list {
+            background-color: #f8f9fa;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 13px;
+        }
+        
+        .scope-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #5f6368;
+        }
+        
+        .scope-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .scope-icon {
+            color: #1a73e8;
+            font-size: 12px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        
+        .scope-text {
+            flex: 1;
+        }
+        
+        .warning-box {
+            background-color: #fef7e0;
+            border-left: 4px solid #f9ab00;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            font-size: 12px;
+            color: #3c4043;
+        }
+        
+        .warning-box i {
+            color: #f9ab00;
+            margin-right: 8px;
+        }
+        
+        .info-box {
+            background-color: #e6f4ea;
+            border-left: 4px solid #34a853;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            font-size: 12px;
+            color: #0d652d;
+        }
+        
+        .info-box i {
+            color: #34a853;
+            margin-right: 8px;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 32px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-cancel {
+            background-color: white;
+            color: #1a73e8;
+            border: 1px solid #dadce0;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #f8f9fa;
+            border-color: #d2e3fc;
+        }
+        
+        .btn-authorize {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .btn-authorize:hover {
+            background-color: #1765cc;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .btn-authorize:disabled {
+            background-color: #dadce0;
+            color: #80868b;
+            cursor: not-allowed;
+        }
+        
+        .spinner {
+            display: none;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        .btn-authorize.loading .spinner {
+            display: block;
+        }
+        
+        .btn-authorize.loading .btn-text {
+            display: none;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .footer-links {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #dadce0;
+            font-size: 12px;
+        }
+        
+        .footer-links a {
+            color: #1a73e8;
+            text-decoration: none;
+            margin: 0 8px;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 576px) {
+            .authorize-card {
+                padding: 32px 24px 24px;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .form-actions {
+                flex-direction: column-reverse;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="authorize-container">
+        <div class="authorize-card">
+            <!-- ロゴ -->
+            <div class="logo">
+                <div class="logo-text">Enova ID</div>
+            </div>
+            
+            <!-- ユーザー情報 -->
+            <div class="user-info">
+                <div class="user-avatar">{{ user.username|slice:":1"|upper }}</div>
+                <span>{{ user.get_display_name }}</span>
+            </div>
+            
+            <!-- クライアント情報 -->
+            <div class="client-info">
+                <div class="client-name">
+                    <i class="fas fa-shield-alt" style="color: #1a73e8; margin-right: 8px;"></i>
+                    {{ app_name }}
+                </div>
+                <div class="client-url">{{ redirect_uri }}</div>
+            </div>
+            
+            <!-- 警告 -->
+            <div class="warning-box">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>アクセス許可に関する注意</strong><br>
+                このアプリケーションに以下の権限へのアクセスを許可します
+            </div>
+            
+            <!-- スコープ情報 -->
+            <div class="scopes-section">
+                <div class="scopes-title">リクエストされた権限：</div>
+                <div class="scopes-list">
+                    {% if 'read' in scope %}
+                        <div class="scope-item">
+                            <i class="fas fa-check-circle scope-icon"></i>
+                            <span class="scope-text">
+                                <strong>プロフィール情報の読み取り</strong><br>
+                                <small>名前、ユーザーID、メールアドレスなどの基本情報</small>
+                            </span>
+                        </div>
+                    {% endif %}
+                    
+                    {% if 'write' in scope %}
+                        <div class="scope-item">
+                            <i class="fas fa-check-circle scope-icon"></i>
+                            <span class="scope-text">
+                                <strong>プロフィール情報の修正</strong><br>
+                                <small>プロフィール情報の更新</small>
+                            </span>
+                        </div>
+                    {% endif %}
+                    
+                    {% if 'profile' in scope %}
+                        <div class="scope-item">
+                            <i class="fas fa-check-circle scope-icon"></i>
+                            <span class="scope-text">
+                                <strong>プロフィール（OpenID Connect）</strong><br>
+                                <small>OpenID Connect 対応のプロフィール情報</small>
+                            </span>
+                        </div>
+                    {% endif %}
+                    
+                    {% if 'email' in scope %}
+                        <div class="scope-item">
+                            <i class="fas fa-check-circle scope-icon"></i>
+                            <span class="scope-text">
+                                <strong>メールアドレス</strong><br>
+                                <small>メールアドレスの取得</small>
+                            </span>
+                        </div>
+                    {% endif %}
+                    
+                    {% if 'openid' in scope %}
+                        <div class="scope-item">
+                            <i class="fas fa-check-circle scope-icon"></i>
+                            <span class="scope-text">
+                                <strong>OpenID 識別子</strong><br>
+                                <small>ユーザーを一意に識別するID</small>
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 情報ボックス -->
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <strong>後でいつでもこのアプリケーションの権限を取り消すことができます</strong>
+            </div>
+            
+            <!-- フォーム -->
+            <form method="post" id="authorizeForm">
+                {% csrf_token %}
+                <input type="hidden" name="client_id" value="{{ client_id }}">
+                <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
+                <input type="hidden" name="scope" value="{{ scope }}">
+                <input type="hidden" name="state" value="{{ state }}">
+                
+                <div class="form-actions">
+                    <a href="{{ cancel_url }}" class="btn btn-cancel">
+                        <i class="fas fa-times"></i>
+                        <span>キャンセル</span>
+                    </a>
+                    <button type="submit" class="btn btn-authorize" id="authorizeBtn">
+                        <div class="spinner"></div>
+                        <span class="btn-text">
+                            <i class="fas fa-check"></i>
+                            許可
+                        </span>
+                    </button>
+                </div>
+            </form>
+            
+            <!-- フッター -->
+            <div class="footer-links">
+                <a href="#">プライバシーポリシー</a>
+                <a href="#">利用規約</a>
+                <a href="#">ヘルプ</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('authorizeForm').addEventListener('submit', function() {
+            const btn = document.getElementById('authorizeBtn');
+            btn.disabled = true;
+            btn.classList.add('loading');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,457 @@
+{% extends 'base.html' %}
+
+{% block title %}プロフィール編集 - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-edit-container {
+        max-width: 680px;
+        margin: 0 auto;
+    }
+    
+    .profile-image-section {
+        text-align: center;
+        padding: 40px 0;
+        background-color: var(--note-white);
+        border-radius: 8px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 8px var(--note-shadow);
+    }
+    
+    .profile-image-preview {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 20px;
+        display: block;
+        box-shadow: 0 4px 12px var(--note-shadow);
+        border: 3px solid var(--note-white);
+    }
+    
+    .profile-image-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--note-green), #57d9a3);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px var(--note-shadow);
+        border: 3px solid var(--note-white);
+    }
+    
+    .profile-image-placeholder i {
+        font-size: 48px;
+        color: white;
+    }
+    
+    .custom-file-upload {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 24px;
+        cursor: pointer;
+        background-color: var(--note-white);
+        color: var(--note-text);
+        border: 1px solid var(--note-border);
+        border-radius: 100px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .custom-file-upload:hover {
+        background-color: var(--note-bg);
+        transform: translateY(-1px);
+    }
+    
+    #id_profile_image {
+        display: none;
+    }
+    
+    .file-name {
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--note-text-light);
+    }
+    
+    .form-group {
+        margin-bottom: 28px;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--note-text);
+        margin-bottom: 8px;
+    }
+    
+    .form-label i {
+        margin-right: 6px;
+        color: var(--note-green);
+        width: 16px;
+        text-align: center;
+    }
+    
+    .form-label .required {
+        color: #f85149;
+        margin-left: 4px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--note-border);
+        border-radius: 6px;
+        font-size: 15px;
+        font-family: inherit;
+        transition: all 0.2s;
+        background-color: var(--note-white);
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--note-green);
+        box-shadow: 0 0 0 3px rgba(65, 201, 142, 0.1);
+    }
+    
+    .form-control.is-invalid {
+        border-color: #f85149;
+    }
+    
+    .form-control.is-invalid:focus {
+        box-shadow: 0 0 0 3px rgba(248, 81, 73, 0.1);
+    }
+    
+    .form-control:disabled,
+    .form-control[readonly] {
+        background-color: var(--note-bg);
+        cursor: not-allowed;
+        color: var(--note-text-light);
+    }
+    
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+        line-height: 1.6;
+    }
+    
+    .form-text {
+        font-size: 13px;
+        color: var(--note-text-light);
+        margin-top: 6px;
+        display: block;
+    }
+    
+    .char-count {
+        float: right;
+        font-size: 13px;
+        color: var(--note-text-light);
+    }
+    
+    .char-count.warning {
+        color: #f0ad4e;
+    }
+    
+    .char-count.danger {
+        color: #f85149;
+    }
+    
+    .invalid-feedback {
+        color: #f85149;
+        font-size: 13px;
+        margin-top: 6px;
+        display: block;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        padding-top: 32px;
+        border-top: 1px solid var(--note-border);
+        margin-top: 32px;
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 32px;
+        border: none;
+        border-radius: 100px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        font-family: inherit;
+    }
+    
+    .btn-primary {
+        background-color: var(--note-green);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--note-green-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(65, 201, 142, 0.3);
+    }
+    
+    .btn-primary:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .btn-secondary {
+        background-color: var(--note-white);
+        color: var(--note-text);
+        border: 1px solid var(--note-border);
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--note-bg);
+        transform: translateY(-1px);
+    }
+    
+    .password-change-link {
+        text-align: center;
+        margin-top: 24px;
+    }
+    
+    .password-change-link a {
+        color: var(--note-green);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .password-change-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-edit-container">
+    <div class="profile-image-section">
+        <div id="imagePreviewContainer">
+            {% if user.profile_image %}
+                <img src="{{ user.profile_image.url }}" 
+                     alt="プロフィール画像" 
+                     class="profile-image-preview" 
+                     id="imagePreview">
+            {% else %}
+                <div class="profile-image-placeholder" id="imagePreview">
+                    <i class="fas fa-user"></i>
+                </div>
+            {% endif %}
+        </div>
+        
+        <label class="custom-file-upload" for="id_profile_image">
+            <i class="fas fa-camera"></i>
+            <span>画像を変更</span>
+        </label>
+        <input type="file" 
+               name="profile_image" 
+               accept="image/*"
+               id="id_profile_image"
+               form="profileForm">
+        <div id="fileName" class="file-name"></div>
+    </div>
+    
+    <div class="note-card">
+        <div class="note-card-header">
+            <h2>
+                <i class="fas fa-edit"></i>
+                プロフィール情報
+            </h2>
+        </div>
+        <div class="note-card-body">
+            <form method="post" enctype="multipart/form-data" id="profileForm">
+                {% csrf_token %}
+                
+                <!-- ユーザーID（読み取り専用） -->
+                <div class="form-group">
+                    <label for="id_username" class="form-label">
+                        <i class="fas fa-id-card"></i>
+                        ユーザーID
+                    </label>
+                    <input type="text" 
+                           name="username" 
+                           class="form-control"
+                           id="id_username"
+                           value="{{ user.username }}"
+                           readonly>
+                    <div class="form-text">ユーザーIDは変更できません</div>
+                </div>
+                
+                <!-- ニックネーム -->
+                <div class="form-group">
+                    <label for="id_nickname" class="form-label">
+                        <i class="fas fa-signature"></i>
+                        ニックネーム
+                    </label>
+                    <input type="text" 
+                           name="nickname" 
+                           class="form-control {% if form.nickname.errors %}is-invalid{% endif %}"
+                           id="id_nickname"
+                           value="{{ form.nickname.value|default:user.nickname }}"
+                           maxlength="50"
+                           placeholder="太郎">
+                    <div class="form-text">表示用の名前（日本語可、未設定の場合はユーザーIDが表示されます）</div>
+                    {% if form.nickname.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.nickname.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- メールアドレス -->
+                <div class="form-group">
+                    <label for="id_email" class="form-label">
+                        <i class="fas fa-envelope"></i>
+                        メールアドレス
+                        <span class="required">*</span>
+                    </label>
+                    <input type="email" 
+                           name="email" 
+                           class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                           id="id_email"
+                           value="{{ form.email.value|default:user.email }}"
+                           maxlength="254"
+                           required>
+                    {% if form.email.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.email.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- 電話番号 -->
+                <div class="form-group">
+                    <label for="id_phone_number" class="form-label">
+                        <i class="fas fa-phone"></i>
+                        電話番号
+                    </label>
+                    <input type="tel" 
+                           name="phone_number" 
+                           class="form-control {% if form.phone_number.errors %}is-invalid{% endif %}"
+                           id="id_phone_number"
+                           value="{{ form.phone_number.value|default:user.phone_number }}"
+                           maxlength="15"
+                           placeholder="090-1234-5678">
+                    {% if form.phone_number.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.phone_number.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- 自己紹介 -->
+                <div class="form-group">
+                    <label for="id_bio" class="form-label">
+                        <i class="fas fa-pen"></i>
+                        自己紹介
+                        <span class="char-count" id="charCount">0/500</span>
+                    </label>
+                    <textarea name="bio" 
+                              class="form-control {% if form.bio.errors %}is-invalid{% endif %}"
+                              id="id_bio"
+                              maxlength="500"
+                              placeholder="あなたについて教えてください...">{{ form.bio.value|default:user.bio }}</textarea>
+                    {% if form.bio.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.bio.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- ボタン -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-check"></i>
+                        <span>保存する</span>
+                    </button>
+                    <a href="{% url 'profile' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        <span>キャンセル</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="password-change-link">
+        <a href="{% url 'password_change' %}">
+            <i class="fas fa-key"></i>
+            <span>パスワードを変更する</span>
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 画像プレビュー
+    document.getElementById('id_profile_image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const fileNameDiv = document.getElementById('fileName');
+        const imagePreview = document.getElementById('imagePreview');
+        
+        if (file) {
+            fileNameDiv.textContent = file.name;
+            fileNameDiv.style.color = 'var(--note-green)';
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (imagePreview.tagName === 'IMG') {
+                    imagePreview.src = e.target.result;
+                } else {
+                    const newImg = document.createElement('img');
+                    newImg.src = e.target.result;
+                    newImg.alt = 'プロフィール画像';
+                    newImg.className = 'profile-image-preview';
+                    newImg.id = 'imagePreview';
+                    imagePreview.parentNode.replaceChild(newImg, imagePreview);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // 文字数カウント
+    const bioTextarea = document.getElementById('id_bio');
+    const charCount = document.getElementById('charCount');
+    
+    function updateCharCount() {
+        const count = bioTextarea.value.length;
+        charCount.textContent = `${count}/500`;
+        
+        charCount.classList.remove('warning', 'danger');
+        if (count > 480) {
+            charCount.classList.add('danger');
+        } else if (count > 450) {
+            charCount.classList.add('warning');
+        }
+    }
+    
+    bioTextarea.addEventListener('input', updateCharCount);
+    updateCharCount();
+    
+    // フォーム送信
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>保存中...</span>';
+    });
+</script>
+{% endblock %}

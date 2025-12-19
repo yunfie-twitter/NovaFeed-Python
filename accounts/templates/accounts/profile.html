@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user.get_display_name }}のプロフィール{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 680px;
+        margin: 0 auto;
+    }
+    
+    .profile-header {
+        text-align: center;
+        padding: 48px 24px;
+        background-color: var(--note-white);
+        border-radius: 8px;
+        box-shadow: 0 2px 8px var(--note-shadow);
+        margin-bottom: 24px;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 20px;
+        display: block;
+        box-shadow: 0 4px 12px var(--note-shadow);
+        border: 3px solid var(--note-white);
+    }
+    
+    .profile-avatar-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--note-green), #57d9a3);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px var(--note-shadow);
+        border: 3px solid var(--note-white);
+    }
+    
+    .profile-avatar-placeholder i {
+        font-size: 48px;
+        color: white;
+    }
+    
+    .profile-name {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--note-text);
+        margin-bottom: 8px;
+    }
+    
+    .profile-meta {
+        color: var(--note-text-light);
+        font-size: 14px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .profile-username {
+        color: var(--note-green);
+        font-weight: 500;
+    }
+    
+    .profile-bio {
+        color: var(--note-text);
+        font-size: 15px;
+        line-height: 1.7;
+        margin-bottom: 24px;
+        white-space: pre-wrap;
+        text-align: left;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 0 16px;
+    }
+    
+    .profile-info-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .profile-info-table tr {
+        border-bottom: 1px solid var(--note-border);
+    }
+    
+    .profile-info-table tr:last-child {
+        border-bottom: none;
+    }
+    
+    .profile-info-table th {
+        text-align: left;
+        padding: 16px;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--note-text-light);
+        width: 35%;
+        background-color: var(--note-bg);
+    }
+    
+    .profile-info-table td {
+        padding: 16px;
+        font-size: 15px;
+        color: var(--note-text);
+    }
+    
+    .profile-info-table td i {
+        margin-right: 8px;
+        color: var(--note-text-light);
+    }
+    
+    .edit-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background-color: var(--note-green);
+        color: white;
+        border: none;
+        border-radius: 100px;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .edit-button:hover {
+        background-color: var(--note-green-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(65, 201, 142, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        {% if user.profile_image %}
+            <img src="{{ user.profile_image.url }}" 
+                 alt="{{ user.get_display_name }}" 
+                 class="profile-avatar">
+        {% else %}
+            <div class="profile-avatar-placeholder">
+                <i class="fas fa-user"></i>
+            </div>
+        {% endif %}
+        
+        <h1 class="profile-name">{{ user.get_display_name }}</h1>
+        <div class="profile-meta">
+            <span class="profile-username">@{{ user.username }}</span>
+            <span>•</span>
+            <span>{{ user.email }}</span>
+        </div>
+        
+        {% if user.bio %}
+            <div class="profile-bio">{{ user.bio }}</div>
+        {% endif %}
+        
+        <a href="{% url 'profile_edit' %}" class="edit-button">
+            <i class="fas fa-pen"></i>
+            <span>プロフィールを編集</span>
+        </a>
+    </div>
+    
+    <div class="note-card">
+        <div class="note-card-header">
+            <h2>
+                <i class="fas fa-info-circle"></i>
+                詳細情報
+            </h2>
+        </div>
+        <div class="note-card-body" style="padding: 0;">
+            <table class="profile-info-table">
+                <tr>
+                    <th>ユーザーID</th>
+                    <td>
+                        <i class="fas fa-at"></i>
+                        {{ user.username }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>ニックネーム</th>
+                    <td>
+                        <i class="fas fa-signature"></i>
+                        {{ user.nickname|default:"未設定" }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>メールアドレス</th>
+                    <td>
+                        <i class="fas fa-envelope"></i>
+                        {{ user.email }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>電話番号</th>
+                    <td>
+                        <i class="fas fa-phone"></i>
+                        {{ user.phone_number|default:"未設定" }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>登録日</th>
+                    <td>
+                        <i class="fas fa-calendar-plus"></i>
+                        {{ user.created_at|date:"Y年m月d日" }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>最終更新</th>
+                    <td>
+                        <i class="fas fa-clock"></i>
+                        {{ user.updated_at|date:"Y年m月d日 H:i" }}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
