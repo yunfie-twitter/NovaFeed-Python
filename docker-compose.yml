@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: novafeed_web
+    command: |
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+      - DATABASE_URL=sqlite:///db.sqlite3
+      - SECRET_KEY=django-insecure-a8fzepjts#9i36tny87z59d=^5exmkk$a8a0^**vww145wwjce
+    depends_on:
+      - db
+    networks:
+      - novafeed_network
+
+  db:
+    image: postgres:16-alpine
+    container_name: novafeed_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=novafeed
+      - POSTGRES_USER=novafeed_user
+      - POSTGRES_PASSWORD=novafeed_password
+    ports:
+      - "5432:5432"
+    networks:
+      - novafeed_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U novafeed_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Optional: Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: novafeed_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - novafeed_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+
+networks:
+  novafeed_network:
+    driver: bridge
