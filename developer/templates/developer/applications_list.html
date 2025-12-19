@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block title %}アプリケーション一覧 - 開発者ポータル{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dev-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .dev-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #dadce0;
+    }
+    
+    .dev-header h1 {
+        margin: 0;
+        font-size: 28px;
+        color: #202124;
+    }
+    
+    .btn-primary {
+        background-color: #1a73e8;
+        color: white;
+        padding: 10px 24px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    
+    .btn-primary:hover {
+        background-color: #1765cc;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    .apps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .app-card {
+        background: white;
+        border: 1px solid #dadce0;
+        border-radius: 8px;
+        padding: 20px;
+        transition: all 0.2s;
+    }
+    
+    .app-card:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        border-color: #1a73e8;
+    }
+    
+    .app-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 12px;
+    }
+    
+    .app-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #202124;
+        margin: 0;
+    }
+    
+    .app-status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .status-active {
+        background-color: #e6f4ea;
+        color: #0d652d;
+    }
+    
+    .status-inactive {
+        background-color: #fce8e6;
+        color: #c5221f;
+    }
+    
+    .app-description {
+        font-size: 13px;
+        color: #5f6368;
+        margin: 0 0 16px;
+        line-height: 1.5;
+    }
+    
+    .app-meta {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 16px;
+        font-size: 12px;
+    }
+    
+    .meta-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        color: #5f6368;
+    }
+    
+    .meta-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .meta-label {
+        font-weight: 500;
+    }
+    
+    .meta-value {
+        font-family: 'Courier New', monospace;
+        word-break: break-all;
+        color: #202124;
+    }
+    
+    .app-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-small {
+        padding: 8px 12px;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        background-color: white;
+        color: #1a73e8;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .btn-small:hover {
+        background-color: #f8f9fa;
+        border-color: #1a73e8;
+    }
+    
+    .btn-small.danger {
+        color: #d93025;
+        border-color: #d93025;
+    }
+    
+    .btn-small.danger:hover {
+        background-color: #fce8e6;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #5f6368;
+    }
+    
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+    }
+    
+    .empty-state h2 {
+        font-size: 20px;
+        color: #202124;
+        margin-bottom: 8px;
+    }
+    
+    .empty-state p {
+        margin-bottom: 24px;
+    }
+    
+    .sidebar {
+        display: none;
+    }
+    
+    @media (max-width: 768px) {
+        .dev-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .apps-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dev-container">
+    <div class="dev-header">
+        <h1><i class="fas fa-cube"></i> アプリケーション</h1>
+        <a href="{% url 'developer:application_create' %}" class="btn-primary">
+            <i class="fas fa-plus"></i>
+            新しいアプリケーション
+        </a>
+    </div>
+    
+    {% if applications %}
+        <div class="apps-grid">
+            {% for app in applications %}
+            <div class="app-card">
+                <div class="app-header">
+                    <h3 class="app-name">{{ app.name }}</h3>
+                    <span class="app-status {% if app.is_active %}status-active{% else %}status-inactive{% endif %}">
+                        {% if app.is_active %}アクティブ{% else %}非アクティブ{% endif %}
+                    </span>
+                </div>
+                
+                <p class="app-description">{{ app.description|truncatewords:20 }}</p>
+                
+                <div class="app-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Client ID:</span>
+                        <span class="meta-value" style="font-size: 11px;">{{ app.client_id|truncatechars:20 }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">作成日:</span>
+                        <span class="meta-value">{{ app.created_at|date:"Y-m-d" }}</span>
+                    </div>
+                    {% if app.website %}
+                    <div class="meta-item">
+                        <span class="meta-label">ウェブサイト:</span>
+                        <span class="meta-value" style="font-size: 11px;">
+                            <a href="{{ app.website }}" target="_blank" style="color: #1a73e8;">
+                                {{ app.website|truncatechars:30 }}
+                            </a>
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="app-actions">
+                    <button class="btn-small" onclick="copyToClipboard('{{ app.client_id }}')">
+                        <i class="fas fa-copy"></i> Client ID
+                    </button>
+                    <a href="javascript:void(0)" class="btn-small" onclick="editApp({{ app.id }})">
+                        <i class="fas fa-edit"></i> 編集
+                    </a>
+                    <a href="javascript:void(0)" class="btn-small" onclick="viewStats({{ app.id }})">
+                        <i class="fas fa-chart-bar"></i> 統計
+                    </a>
+                    <a href="javascript:void(0)" class="btn-small danger" onclick="deleteApp({{ app.id }})">
+                        <i class="fas fa-trash"></i> 削除
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📱</div>
+            <h2>アプリケーションがまだありません</h2>
+            <p>新しいOAuthアプリケーションを作成して、APIの統合を開始しましょう</p>
+            <a href="{% url 'developer:application_create' %}" class="btn-primary">
+                <i class="fas fa-plus"></i>
+                新しいアプリケーション
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('コピーしました');
+        });
+    }
+    
+    function editApp(appId) {
+        window.location.href = `/developer/applications/${appId}/edit/`;
+    }
+    
+    function viewStats(appId) {
+        window.location.href = `/developer/applications/${appId}/stats/`;
+    }
+    
+    function deleteApp(appId) {
+        if (confirm('このアプリケーションを削除してもよろしいですか？')) {
+            window.location.href = `/developer/applications/${appId}/delete/`;
+        }
+    }
+</script>
+{% endblock %}

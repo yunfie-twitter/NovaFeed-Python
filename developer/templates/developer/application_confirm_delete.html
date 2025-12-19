@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}アプリケーション削除 - 開発者ポータル{% endblock %}
+
+{% block extra_css %}
+<style>
+    .confirm-container {
+        max-width: 500px;
+        margin: 60px auto;
+        padding: 20px;
+    }
+    
+    .confirm-card {
+        background: white;
+        border-radius: 8px;
+        padding: 32px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        text-align: center;
+    }
+    
+    .confirm-icon {
+        font-size: 64px;
+        color: #d93025;
+        margin-bottom: 16px;
+    }
+    
+    .confirm-card h1 {
+        color: #202124;
+        margin-bottom: 8px;
+    }
+    
+    .confirm-card p {
+        color: #5f6368;
+        margin-bottom: 24px;
+        line-height: 1.6;
+    }
+    
+    .app-name {
+        background-color: #fce8e6;
+        border: 1px solid #d93025;
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin: 16px 0;
+        font-weight: 600;
+        color: #c5221f;
+    }
+    
+    .confirm-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+    
+    .btn {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    
+    .btn-cancel {
+        background-color: white;
+        color: #1a73e8;
+        border: 1px solid #dadce0;
+    }
+    
+    .btn-confirm {
+        background-color: #d93025;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirm-container">
+    <div class="confirm-card">
+        <div class="confirm-icon">
+            <i class="fas fa-trash"></i>
+        </div>
+        
+        <h1>アプリケーションを削除しますか？</h1>
+        <p>以下のアプリケーションは完全に削除されます。この操作は取り消せません。</p>
+        
+        <div class="app-name">{{ app.name }}</div>
+        
+        <p style="font-size: 12px; color: #d93025;">
+            <i class="fas fa-exclamation-triangle"></i>
+            このアプリケーションを使用しているすべてのトークンは無効になります。
+        </p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="confirm-actions">
+                <a href="{% url 'developer:applications_list' %}" class="btn btn-cancel">
+                    キャンセル
+                </a>
+                <button type="submit" class="btn btn-confirm">
+                    <i class="fas fa-trash"></i> 削除
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

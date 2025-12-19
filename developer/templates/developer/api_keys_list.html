@@ -1,0 +1,634 @@
+{% extends 'base.html' %}
+
+{% block title %}APIキー管理 - 開発者ポータル{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dev-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .dev-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #dadce0;
+    }
+    
+    .dev-header h1 {
+        margin: 0;
+        font-size: 28px;
+        color: #202124;
+    }
+    
+    .btn-primary {
+        background-color: #1a73e8;
+        color: white;
+        padding: 10px 24px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-primary:hover {
+        background-color: #1765cc;
+    }
+    
+    .warning-box {
+        background-color: #fef7e0;
+        border-left: 4px solid #f9ab00;
+        padding: 16px;
+        border-radius: 4px;
+        margin-bottom: 24px;
+        font-size: 13px;
+        color: #3c4043;
+    }
+    
+    .warning-box i {
+        color: #f9ab00;
+        margin-right: 8px;
+    }
+    
+    .keys-table {
+        width: 100%;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    
+    .keys-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .keys-table thead {
+        background-color: #f8f9fa;
+    }
+    
+    .keys-table th {
+        padding: 16px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 600;
+        color: #5f6368;
+        border-bottom: 1px solid #dadce0;
+    }
+    
+    .keys-table td {
+        padding: 16px;
+        border-bottom: 1px solid #dadce0;
+        font-size: 13px;
+    }
+    
+    .keys-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .key-name {
+        font-weight: 500;
+        color: #202124;
+    }
+    
+    .key-value {
+        font-family: 'Courier New', monospace;
+        font-size: 11px;
+        color: #5f6368;
+        word-break: break-all;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background-color: #e6f4ea;
+        color: #0d652d;
+    }
+    
+    .status-inactive {
+        background-color: #fce8e6;
+        color: #c5221f;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .btn-small {
+        padding: 6px 12px;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        background-color: white;
+        color: #1a73e8;
+        font-size: 11px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-small:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .btn-small.danger {
+        color: #d93025;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 8px;
+    }
+    
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+    }
+    
+    .empty-state h2 {
+        font-size: 20px;
+        color: #202124;
+        margin-bottom: 8px;
+    }
+    
+    .empty-state p {
+        color: #5f6368;
+        margin-bottom: 24px;
+    }
+    
+    /* モーダル */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal.show {
+        display: flex;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 8px;
+        padding: 32px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #dadce0;
+    }
+    
+    .modal-header h2 {
+        margin: 0;
+        font-size: 20px;
+        color: #202124;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #5f6368;
+        cursor: pointer;
+        padding: 0;
+    }
+    
+    .modal-close:hover {
+        color: #202124;
+    }
+    
+    .secret-display {
+        background-color: #f8f9fa;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .secret-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #5f6368;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .secret-value {
+        background: white;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        padding: 12px;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: #202124;
+        word-break: break-all;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .copy-btn {
+        padding: 6px 12px;
+        background: #1a73e8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    
+    .copy-btn:hover {
+        background: #1765cc;
+    }
+    
+    .copy-btn.copied {
+        background: #34a853;
+    }
+    
+    .info-box {
+        background-color: #e6f4ea;
+        border-left: 4px solid #34a853;
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin-bottom: 16px;
+        font-size: 12px;
+        color: #0d652d;
+    }
+    
+    .info-box strong {
+        display: block;
+        margin-bottom: 4px;
+    }
+    
+    .modal-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+    
+    .btn {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    
+    .btn-secondary {
+        background: white;
+        color: #1a73e8;
+        border: 1px solid #dadce0;
+    }
+    
+    .btn-secondary:hover {
+        background: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dev-container">
+    <div class="dev-header">
+        <h1><i class="fas fa-key"></i> APIキー</h1>
+        <button class="btn-primary" onclick="openCreateKeyModal()">
+            <i class="fas fa-plus"></i>
+            新しいキー
+        </button>
+    </div>
+    
+    <div class="warning-box">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>重要:</strong> APIシークレットは作成時のみ表示されます。安全な場所に保管してください。
+    </div>
+    
+    {% if api_keys %}
+        <div class="keys-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">名前</th>
+                        <th style="width: 25%;">キー</th>
+                        <th style="width: 15%;">ステータス</th>
+                        <th style="width: 20%;">最後に使用</th>
+                        <th style="width: 20%;">アクション</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key in api_keys %}
+                    <tr>
+                        <td>
+                            <div class="key-name">{{ key.name }}</div>
+                            <div class="key-value">作成: {{ key.created_at|date:"Y-m-d H:i" }}</div>
+                        </td>
+                        <td>
+                            <div class="key-value">{{ key.key|truncatechars:20 }}</div>
+                            <button class="btn-small" onclick="copyValue('{{ key.key }}')">
+                                <i class="fas fa-copy"></i> コピー
+                            </button>
+                        </td>
+                        <td>
+                            <span class="status-badge {% if key.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                {% if key.is_active %}有効{% else %}無効{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            {% if key.last_used %}
+                                {{ key.last_used|date:"Y-m-d H:i" }}
+                            {% else %}
+                                <span style="color: #5f6368;">未使用</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-small" onclick="regenerateKey({{ key.id }})">
+                                    <i class="fas fa-sync"></i> 再生成
+                                </button>
+                                <button class="btn-small danger" onclick="deleteKey({{ key.id }})">
+                                    <i class="fas fa-trash"></i> 削除
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🔑</div>
+            <h2>APIキーがまだありません</h2>
+            <p>新しいAPIキーを作成して、APIへのアクセスを開始しましょう</p>
+            <button class="btn-primary" onclick="openCreateKeyModal()">
+                <i class="fas fa-plus"></i>
+                新しいキー
+            </button>
+        </div>
+    {% endif %}
+</div>
+
+<!-- APIキー作成モーダル -->
+<div class="modal" id="createKeyModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-plus"></i> 新しいAPIキー</h2>
+            <button class="modal-close" onclick="closeCreateKeyModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div id="createForm">
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 12px; font-weight: 600; color: #5f6368; margin-bottom: 4px;">キー名</label>
+                <input type="text" id="keyName" placeholder="例：Production API" style="width: 100%; padding: 8px 12px; border: 1px solid #dadce0; border-radius: 4px; font-size: 13px; box-sizing: border-box;">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeCreateKeyModal()">キャンセル</button>
+                <button class="btn btn-primary" onclick="confirmCreateKey()" style="background-color: #1a73e8; color: white; border: none;">作成</button>
+            </div>
+        </div>
+        
+        <div id="successForm" style="display: none;">
+            <div class="info-box">
+                <strong>✓ APIキーが作成されました</strong>
+                <div style="margin-top: 4px;">シークレットキーは今後表示されません。安全に保管してください。</div>
+            </div>
+            
+            <div class="secret-display">
+                <span class="secret-label">キー</span>
+                <div class="secret-value">
+                    <span id="displayKey"></span>
+                    <button class="copy-btn" onclick="copySecret('displayKey', this)">
+                        <i class="fas fa-copy"></i> コピー
+                    </button>
+                </div>
+            </div>
+            
+            <div class="secret-display">
+                <span class="secret-label">シークレット</span>
+                <div class="secret-value">
+                    <span id="displaySecret"></span>
+                    <button class="copy-btn" onclick="copySecret('displaySecret', this)">
+                        <i class="fas fa-copy"></i> コピー
+                    </button>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="finishCreateKey()" style="background-color: #1a73e8; color: white; border: none;">
+                    <i class="fas fa-check"></i> 完了
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // CSRF トークンを取得する関数
+    function getCsrfToken() {
+        const token = document.querySelector('[name="csrfmiddlewaretoken"]')?.value;
+        if (!token) {
+            // フォームがない場合は、メタタグから取得
+            const metaToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            return metaToken || '';
+        }
+        return token;
+    }
+    
+    function openCreateKeyModal() {
+        document.getElementById('createKeyModal').classList.add('show');
+        document.getElementById('createForm').style.display = 'block';
+        document.getElementById('successForm').style.display = 'none';
+        document.getElementById('keyName').value = '';
+        document.getElementById('keyName').focus();
+    }
+    
+    function closeCreateKeyModal() {
+        document.getElementById('createKeyModal').classList.remove('show');
+    }
+    
+    function confirmCreateKey() {
+        const name = document.getElementById('keyName').value.trim();
+        if (!name) {
+            alert('キー名を入力してください');
+            return;
+        }
+        
+        const csrfToken = getCsrfToken();
+        
+        fetch('{% url "developer:api_key_create" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // 成功フォームを表示
+                document.getElementById('createForm').style.display = 'none';
+                document.getElementById('successForm').style.display = 'block';
+                
+                // キーとシークレットを表示
+                document.getElementById('displayKey').textContent = data.key;
+                document.getElementById('displaySecret').textContent = data.secret;
+                
+                // 自動的にシークレットをコピー
+                navigator.clipboard.writeText(data.secret).then(() => {
+                    console.log('シークレットを自動コピーしました');
+                }).catch(err => {
+                    console.error('コピーに失敗:', err);
+                });
+            } else {
+                alert('エラー: ' + (data.error || '不明なエラーが発生しました'));
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            alert('エラーが発生しました');
+        });
+    }
+    
+    function finishCreateKey() {
+        closeCreateKeyModal();
+        location.reload();
+    }
+    
+    function copySecret(elementId, btn) {
+        const text = document.getElementById(elementId).textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            btn.textContent = '✓ コピーしました';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-copy"></i> コピー';
+                btn.classList.remove('copied');
+            }, 2000);
+        }).catch(err => {
+            console.error('コピーエラー:', err);
+            alert('コピーに失敗しました');
+        });
+    }
+    
+    function copyValue(value) {
+        navigator.clipboard.writeText(value).then(() => {
+            alert('コピーしました');
+        }).catch(err => {
+            console.error('コピーエラー:', err);
+            alert('コピーに失敗しました');
+        });
+    }
+    
+    function regenerateKey(keyId) {
+        if (confirm('このキーのシークレットを再生成しますか？')) {
+            const csrfToken = getCsrfToken();
+            
+            fetch(`/developer/api-keys/${keyId}/regenerate/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // 新しいシークレットを表示して自動コピー
+                    navigator.clipboard.writeText(data.secret).then(() => {
+                        alert(`新しいシークレット:\n${data.secret}\n\n(自動コピーされました)`);
+                        location.reload();
+                    }).catch(err => {
+                        alert(`新しいシークレット:\n${data.secret}`);
+                        location.reload();
+                    });
+                } else {
+                    alert('エラー: ' + (data.error || '再生成に失敗しました'));
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('エラーが発生しました: ' + err.message);
+            });
+        }
+    }
+    
+    function deleteKey(keyId) {
+        if (confirm('このAPIキーを削除しますか？')) {
+            const csrfToken = getCsrfToken();
+            
+            fetch(`/developer/api-keys/${keyId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('エラー: ' + (data.error || '削除に失敗しました'));
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('エラーが発生しました: ' + err.message);
+            });
+        }
+    }
+    
+    // Escキーでモーダルを閉じる
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeCreateKeyModal();
+        }
+    });
+</script>
+
+{% endblock %}

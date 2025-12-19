@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}アプリケーション統計 - 開発者ポータル{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .stats-header {
+        margin-bottom: 32px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #dadce0;
+    }
+    
+    .stats-header h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        color: #202124;
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        margin-bottom: 20px;
+    }
+    
+    .stats-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .stats-table thead {
+        background-color: #f8f9fa;
+    }
+    
+    .stats-table th {
+        padding: 12px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 600;
+        color: #5f6368;
+        border-bottom: 1px solid #dadce0;
+    }
+    
+    .stats-table td {
+        padding: 12px;
+        border-bottom: 1px solid #dadce0;
+        font-size: 13px;
+    }
+    
+    .status-200 { color: #34a853; }
+    .status-400 { color: #fbbc04; }
+    .status-500 { color: #ea4335; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stats-container">
+    <div class="stats-header">
+        <h1><i class="fas fa-chart-bar"></i> {{ app.name }} - 統計</h1>
+    </div>
+    
+    <div class="stats-card">
+        <h2 style="margin-top: 0;">最近のAPI呼び出し</h2>
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th>時刻</th>
+                    <th>メソッド</th>
+                    <th>エンドポイント</th>
+                    <th>ステータス</th>
+                    <th>レスポンス時間</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.created_at|date:"Y-m-d H:i:s" }}</td>
+                    <td><strong>{{ log.method }}</strong></td>
+                    <td><code>{{ log.endpoint }}</code></td>
+                    <td><span class="status-{{ log.status_code }}">{{ log.status_code }}</span></td>
+                    <td>{{ log.response_time_ms }}ms</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #5f6368;">まだAPIログがありません</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="text-align: center; margin-top: 32px;">
+        <a href="{% url 'developer:applications_list' %}" style="color: #1a73e8; text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> アプリケーション一覧に戻る
+        </a>
+    </div>
+</div>
+{% endblock %}

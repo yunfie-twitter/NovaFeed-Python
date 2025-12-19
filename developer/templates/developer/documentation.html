@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+
+{% block title %}ドキュメント - 開発者ポータル{% endblock %}
+
+{% block extra_css %}
+<style>
+    .doc-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 32px;
+    }
+    
+    .doc-sidebar {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        height: fit-content;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        position: sticky;
+        top: 20px;
+    }
+    
+    .doc-sidebar h3 {
+        font-size: 12px;
+        font-weight: 600;
+        color: #5f6368;
+        text-transform: uppercase;
+        margin: 0 0 12px;
+    }
+    
+    .doc-sidebar ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .doc-sidebar li {
+        margin-bottom: 8px;
+    }
+    
+    .doc-sidebar a {
+        color: #1a73e8;
+        text-decoration: none;
+        font-size: 13px;
+        display: block;
+        padding: 8px;
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+    
+    .doc-sidebar a:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .doc-content {
+        background: white;
+        border-radius: 8px;
+        padding: 32px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    
+    .doc-section {
+        margin-bottom: 48px;
+        display: none;
+    }
+    
+    .doc-section.active {
+        display: block;
+    }
+    
+    .doc-section h2 {
+        font-size: 24px;
+        color: #202124;
+        margin: 0 0 16px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #1a73e8;
+    }
+    
+    .doc-section h3 {
+        font-size: 18px;
+        color: #202124;
+        margin: 24px 0 12px;
+    }
+    
+    .doc-section p {
+        color: #5f6368;
+        line-height: 1.6;
+        margin-bottom: 16px;
+    }
+    
+    .doc-section ul {
+        margin-left: 20px;
+        margin-bottom: 16px;
+    }
+    
+    .doc-section li {
+        color: #5f6368;
+        margin-bottom: 8px;
+        line-height: 1.6;
+    }
+    
+    .code-block {
+        background-color: #f8f9fa;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        padding: 12px 16px;
+        margin: 12px 0;
+        overflow-x: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: #202124;
+    }
+    
+    .copy-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        padding: 4px 8px;
+        background: #1a73e8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 11px;
+        cursor: pointer;
+    }
+    
+    .info-box {
+        background-color: #e6f4ea;
+        border-left: 4px solid #34a853;
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+        font-size: 13px;
+        color: #0d652d;
+    }
+    
+    .warning-box {
+        background-color: #fef7e0;
+        border-left: 4px solid #f9ab00;
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin: 16px 0;
+        font-size: 13px;
+        color: #3c4043;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+    }
+    
+    th, td {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 1px solid #dadce0;
+    }
+    
+    th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #202124;
+    }
+    
+    @media (max-width: 768px) {
+        .doc-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .doc-sidebar {
+            position: static;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="doc-container">
+    <!-- サイドバー -->
+    <div class="doc-sidebar">
+        <h3>ドキュメント</h3>
+        <ul>
+            <li><a href="#" onclick="showSection('getting-started')">はじめに</a></li>
+            <li><a href="#" onclick="showSection('authentication')">認証</a></li>
+            <li><a href="#" onclick="showSection('oauth')">OAuth 2.0</a></li>
+            <li><a href="#" onclick="showSection('api')">API リファレンス</a></li>
+            <li><a href="#" onclick="showSection('rate-limit')">レート制限</a></li>
+            <li><a href="#" onclick="showSection('errors')">エラーハンドリング</a></li>
+            <li><a href="#" onclick="showSection('faq')">よくある質問</a></li>
+        </ul>
+    </div>
+    
+    <!-- メインコンテンツ -->
+    <div class="doc-content">
+        <!-- はじめに -->
+        <div class="doc-section active" id="getting-started">
+            <h2>はじめに</h2>
+            <p>Enova ID APIへようこそ。このドキュメントでは、OAuth 2.0とAPIキー認証を使用してAPIを統合する方法を説明します。</p>
+            
+            <h3>次のステップ</h3>
+            <ul>
+                <li><a href="{% url 'developer:applications_list' %}">OAuth アプリケーションを作成</a></li>
+                <li><a href="{% url 'developer:api_keys_list' %}">APIキーを生成</a></li>
+                <li>ドキュメントを読んで統合を開始</li>
+            </ul>
+        </div>
+        
+        <!-- 認証 -->
+        <div class="doc-section" id="authentication">
+            <h2>認証</h2>
+            <p>APIは2つの認証方法をサポートしています。</p>
+            
+            <h3>APIキー認証</h3>
+            <p>シンプルなサーバー対サーバーの統合に適しています。</p>
+            <div class="code-block">
+Authorization: Bearer YOUR_API_KEY
+            </div>
+            
+            <h3>OAuth 2.0</h3>
+            <p>ユーザーの認可が必要な場合に使用します。</p>
+            <div class="warning-box">
+                <strong>注意:</strong> シークレットはサーバー側でのみ使用してください。
+            </div>
+        </div>
+        
+        <!-- OAuth -->
+        <div class="doc-section" id="oauth">
+            <h2>OAuth 2.0</h2>
+            <p>Enova IDはOAuth 2.0認可コードフローをサポートしています。</p>
+            
+            <h3>認可リクエスト</h3>
+            <div class="code-block">
+GET /api/oauth/authorize/?
+  client_id=YOUR_CLIENT_ID&
+  response_type=code&
+  redirect_uri=https://yourapp.com/callback&
+  scope=read+profile+email&
+  state=RANDOM_STATE
+            </div>
+            
+            <h3>トークンリクエスト</h3>
+            <div class="code-block">
+POST /api/oauth/token/
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code&
+code=AUTH_CODE&
+client_id=YOUR_CLIENT_ID&
+client_secret=YOUR_CLIENT_SECRET&
+redirect_uri=https://yourapp.com/callback
+            </div>
+            
+            <div class="info-box">
+                <strong>レスポンス:</strong>
+                <div class="code-block">
+{
+  "access_token": "...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "..."
+}
+                </div>
+            </div>
+        </div>
+        
+        <!-- API -->
+        <div class="doc-section" id="api">
+            <h2>API リファレンス</h2>
+            
+            <h3>ユーザー情報取得</h3>
+            <div class="code-block">
+GET /api/oauth/userinfo/
+Authorization: Bearer ACCESS_TOKEN
+            </div>
+            
+            <div class="info-box">
+                <strong>レスポンス:</strong>
+                <div class="code-block">
+{
+  "sub": "user_id",
+  "username": "username",
+  "email": "user@example.com",
+  "name": "User Name",
+  "picture": "https://..."
+}
+                </div>
+            </div>
+        </div>
+        
+        <!-- レート制限 -->
+        <div class="doc-section" id="rate-limit">
+            <h2>レート制限</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>認証方法</th>
+                        <th>制限</th>
+                        <th>リセット</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>APIキー</td>
+                        <td>1000 リクエスト/時間</td>
+                        <td>毎正時</td>
+                    </tr>
+                    <tr>
+                        <td>OAuth トークン</td>
+                        <td>500 リクエスト/時間</td>
+                        <td>毎正時</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- エラーハンドリング -->
+        <div class="doc-section" id="errors">
+            <h2>エラーハンドリング</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ステータス</th>
+                        <th>説明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>401</td>
+                        <td>認証に失敗しました</td>
+                    </tr>
+                    <tr>
+                        <td>403</td>
+                        <td>権限がありません</td>
+                    </tr>
+                    <tr>
+                        <td>429</td>
+                        <td>レート制限を超過しました</td>
+                    </tr>
+                    <tr>
+                        <td>500</td>
+                        <td>サーバーエラー</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- FAQ -->
+        <div class="doc-section" id="faq">
+            <h2>よくある質問</h2>
+            
+            <h3>APIキーはどこで取得できますか？</h3>
+            <p><a href="{% url 'developer:api_keys_list' %}">APIキー管理ページ</a>で生成できます。</p>
+            
+            <h3>トークンの有効期限は？</h3>
+            <p>アクセストークンの有効期限は10時間です。リフレッシュトークンを使用して新しいトークンを取得できます。</p>
+            
+            <h3>複数のアプリケーションを持つことはできますか？</h3>
+            <p>はい、複数のOAuthアプリケーションを登録できます。</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showSection(sectionId) {
+        // すべてのセクションを非表示
+        document.querySelectorAll('.doc-section').forEach(el => {
+            el.classList.remove('active');
+        });
+        
+        // 指定されたセクションを表示
+        document.getElementById(sectionId).classList.add('active');
+        
+        // スクロール
+        document.querySelector('.doc-content').scrollTop = 0;
+    }
+</script>
+{% endblock %}

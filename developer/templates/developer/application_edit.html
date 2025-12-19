@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}アプリケーション編集 - 開発者ポータル{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .edit-header {
+        margin-bottom: 32px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #dadce0;
+    }
+    
+    .edit-header h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        color: #202124;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 8px;
+        padding: 32px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #202124;
+        margin-bottom: 6px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #1a73e8;
+        box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 32px;
+        padding-top: 20px;
+        border-top: 1px solid #dadce0;
+    }
+    
+    .btn {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    
+    .btn-cancel {
+        background-color: white;
+        color: #1a73e8;
+        border: 1px solid #dadce0;
+    }
+    
+    .btn-submit {
+        background-color: #1a73e8;
+        color: white;
+    }
+    
+    .btn-submit:hover {
+        background-color: #1765cc;
+    }
+    
+    .meta-info {
+        background-color: #f8f9fa;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        padding: 16px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #5f6368;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+    <div class="edit-header">
+        <h1><i class="fas fa-edit"></i> アプリケーション編集</h1>
+    </div>
+    
+    <div class="form-card">
+        <div class="meta-info">
+            <strong>Client ID:</strong> <code>{{ app.client_id }}</code><br>
+            <strong>作成日:</strong> {{ app.created_at|date:"Y-m-d H:i" }}<br>
+            <strong>ステータス:</strong> {% if app.is_active %}<span style="color: #34a853;">アクティブ</span>{% else %}<span style="color: #d93025;">非アクティブ</span>{% endif %}
+        </div>
+        
+        <form id="editForm" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">アプリケーション名</label>
+                <input type="text" id="appName" class="form-control" value="{{ app.name }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">説明</label>
+                <textarea id="appDescription" class="form-control" style="min-height: 100px;">{{ app.description }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">ウェブサイト</label>
+                <input type="url" id="appWebsite" class="form-control" value="{{ app.website }}">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <input type="checkbox" id="isActive" {% if app.is_active %}checked{% endif %}>
+                    このアプリケーションはアクティブです
+                </label>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-cancel" onclick="window.history.back()">
+                    キャンセル
+                </button>
+                <button type="submit" class="btn btn-submit">
+                    <i class="fas fa-save"></i> 保存
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('editForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const data = {
+            name: document.getElementById('appName').value,
+            description: document.getElementById('appDescription').value,
+            website: document.getElementById('appWebsite').value,
+            is_active: document.getElementById('isActive').checked,
+        };
+        
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            alert('保存しました');
+            window.location.href = '{% url "developer:applications_list" %}';
+        }
+    });
+</script>
+{% endblock %}

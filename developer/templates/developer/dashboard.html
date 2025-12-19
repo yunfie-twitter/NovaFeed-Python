@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}開発者ダッシュボード{% endblock %}
+
+{% block content %}
+<div style="padding: 20px;">
+    <h1>開発者ダッシュボード</h1>
+    
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
+            <div style="font-size: 32px; font-weight: 700; color: #1a73e8;">{{ apps_count }}</div>
+            <div style="font-size: 14px; color: #5f6368; margin-top: 4px;">登録アプリケーション</div>
+        </div>
+        
+        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
+            <div style="font-size: 32px; font-weight: 700; color: #1a73e8;">{{ api_keys_count }}</div>
+            <div style="font-size: 14px; color: #5f6368; margin-top: 4px;">APIキー</div>
+        </div>
+        
+        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
+            <div style="font-size: 32px; font-weight: 700; color: #1a73e8;">{{ api_calls_month }}</div>
+            <div style="font-size: 14px; color: #5f6368; margin-top: 4px;">今月のAPI呼び出し</div>
+        </div>
+    </div>
+    
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
+        <h2 style="margin-top: 0; color: #202124;">クイックリンク</h2>
+        <a href="{% url 'developer:applications_list' %}" style="background: #1a73e8; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; display: inline-block; margin-right: 8px;">新しいアプリケーション</a>
+        <a href="{% url 'developer:api_keys_list' %}" style="background: #1a73e8; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; display: inline-block; margin-right: 8px;">APIキー管理</a>
+        <a href="{% url 'developer:documentation' %}" style="background: #1a73e8; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; display: inline-block;">ドキュメント</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,626 @@
+{% extends 'base.html' %}
+
+{% block title %}新しいアプリケーション作成 - 開発者ポータル{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .create-header {
+        margin-bottom: 32px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #dadce0;
+    }
+    
+    .create-header h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        color: #202124;
+    }
+    
+    .create-header p {
+        margin: 0;
+        color: #5f6368;
+        font-size: 14px;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 8px;
+        padding: 32px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    
+    .form-section {
+        margin-bottom: 32px;
+    }
+    
+    .form-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #202124;
+        margin: 0 0 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e8e8e8;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #202124;
+        margin-bottom: 6px;
+    }
+    
+    .form-label .required {
+        color: #d93025;
+    }
+    
+    .form-help {
+        display: block;
+        font-size: 12px;
+        color: #5f6368;
+        margin-top: 4px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        font-size: 14px;
+        font-family: inherit;
+        transition: all 0.2s;
+        box-sizing: border-box;
+    }
+    
+    .form-control:hover {
+        border-color: #80868b;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #1a73e8;
+        box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+    }
+    
+    .form-control.error {
+        border-color: #d93025;
+    }
+    
+    .form-control.error:focus {
+        box-shadow: 0 0 0 2px rgba(217, 48, 37, 0.1);
+    }
+    
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    
+    .error-message {
+        color: #d93025;
+        font-size: 12px;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .redirect-uri-item {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 8px;
+        padding: 8px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        border: 1px solid #dadce0;
+    }
+    
+    .redirect-uri-item input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    
+    .redirect-uri-item button {
+        padding: 6px 12px;
+        background: #fce8e6;
+        color: #c5221f;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s;
+    }
+    
+    .redirect-uri-item button:hover {
+        background: #d93025;
+        color: white;
+    }
+    
+    .btn-add-uri {
+        padding: 8px 16px;
+        background-color: white;
+        color: #1a73e8;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-add-uri:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .info-box {
+        background-color: #e6f4ea;
+        border-left: 4px solid #34a853;
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #0d652d;
+    }
+    
+    .warning-box {
+        background-color: #fef7e0;
+        border-left: 4px solid #f9ab00;
+        padding: 12px 16px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #3c4043;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 32px;
+        padding-top: 20px;
+        border-top: 1px solid #dadce0;
+    }
+    
+    .btn {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-cancel {
+        background-color: white;
+        color: #1a73e8;
+        border: 1px solid #dadce0;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .btn-submit {
+        background-color: #1a73e8;
+        color: white;
+    }
+    
+    .btn-submit:hover {
+        background-color: #1765cc;
+    }
+    
+    .btn-submit:disabled {
+        background-color: #dadce0;
+        color: #80868b;
+        cursor: not-allowed;
+    }
+    
+    .loading-spinner {
+        display: none;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        margin-right: 8px;
+    }
+    
+    .btn-submit.loading .loading-spinner {
+        display: inline-block;
+    }
+    
+    .btn-submit.loading .btn-text {
+        display: none;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .success-message {
+        background-color: #e6f4ea;
+        border: 1px solid #34a853;
+        color: #0d652d;
+        padding: 16px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        display: none;
+    }
+    
+    .success-message.show {
+        display: block;
+    }
+    
+    .credentials-display {
+        background-color: #f8f9fa;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        padding: 16px;
+        margin-top: 12px;
+        display: none;
+    }
+    
+    .credentials-display.show {
+        display: block;
+    }
+    
+    .credentials-item {
+        margin-bottom: 12px;
+    }
+    
+    .credentials-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .credentials-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #5f6368;
+        margin-bottom: 4px;
+    }
+    
+    .credentials-value {
+        background: white;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-family: 'Courier New', monospace;
+        font-size: 11px;
+        color: #202124;
+        word-break: break-all;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .copy-btn-small {
+        padding: 4px 8px;
+        background: #1a73e8;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        font-size: 11px;
+        cursor: pointer;
+    }
+    
+    .copy-btn-small:hover {
+        background: #1765cc;
+    }
+    
+    @media (max-width: 768px) {
+        .form-card {
+            padding: 20px;
+        }
+        
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-container">
+    <div class="create-header">
+        <h1><i class="fas fa-plus-circle"></i> 新しいアプリケーション</h1>
+        <p>OAuth 2.0アプリケーションを作成して、APIへのアクセスを開始します</p>
+    </div>
+    
+    <div class="form-card">
+        <div class="success-message" id="successMessage">
+            <i class="fas fa-check-circle"></i>
+            <span id="successText"></span>
+        </div>
+        
+        <form id="createAppForm" novalidate>
+            {% csrf_token %}
+            
+            <!-- 基本情報 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle"></i> 基本情報
+                </h3>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        アプリケーション名 <span class="required">*</span>
+                    </label>
+                    <input type="text" id="appName" class="form-control" placeholder="例：My OAuth App" required>
+                    <span class="form-help">アプリケーションの識別用名前</span>
+                    <div class="error-message" id="appNameError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        説明
+                    </label>
+                    <textarea id="appDescription" class="form-control" placeholder="アプリケーションの説明を入力してください"></textarea>
+                    <span class="form-help">アプリケーションの用途や機能を説明します</span>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        ウェブサイト
+                    </label>
+                    <input type="url" id="appWebsite" class="form-control" placeholder="https://example.com">
+                    <span class="form-help">アプリケーションのホームページURL</span>
+                </div>
+            </div>
+            
+            <!-- リダイレクトURI -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-arrow-right"></i> リダイレクトURI
+                </h3>
+                
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    ユーザーが認可を完了した後にリダイレクトされるURLです。複数指定できます。
+                </div>
+                
+                <div id="redirectUriContainer">
+                    <div class="redirect-uri-item">
+                        <input type="url" class="redirect-uri" placeholder="https://yourapp.com/callback" required>
+                        <button type="button" class="btn-remove-uri" onclick="removeRedirectUri(this)">
+                            <i class="fas fa-trash"></i> 削除
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="button" class="btn-add-uri" onclick="addRedirectUri()">
+                    <i class="fas fa-plus"></i> URI を追加
+                </button>
+                
+                <div class="error-message" id="redirectUriError"></div>
+            </div>
+            
+            <!-- スコープ -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-shield-alt"></i> スコープ（権限）
+                </h3>
+                
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    アプリケーションが要求する権限を選択してください。
+                </div>
+                
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px;">
+                        <input type="checkbox" name="scope" value="read" checked>
+                        <span><strong>read</strong> - プロフィール情報の読み取り</span>
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px;">
+                        <input type="checkbox" name="scope" value="profile">
+                        <span><strong>profile</strong> - OpenID プロフィール情報</span>
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" name="scope" value="email">
+                        <span><strong>email</strong> - メールアドレスアクセス</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- フォーム操作 -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-cancel" onclick="window.history.back()">
+                    <i class="fas fa-times"></i> キャンセル
+                </button>
+                <button type="submit" class="btn btn-submit" id="submitBtn">
+                    <div class="loading-spinner"></div>
+                    <span class="btn-text"><i class="fas fa-check"></i> 作成</span>
+                </button>
+            </div>
+            
+            <!-- 認証情報表示 -->
+            <div class="credentials-display" id="credentialsDisplay">
+                <h3 style="margin-top: 0; color: #202124;">
+                    <i class="fas fa-key"></i> 認証情報
+                </h3>
+                
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>重要:</strong> Client Secret は今後表示されません。安全に保管してください。
+                </div>
+                
+                <div class="credentials-item">
+                    <div class="credentials-label">Client ID</div>
+                    <div class="credentials-value">
+                        <span id="clientIdDisplay"></span>
+                        <button type="button" class="copy-btn-small" onclick="copyToClipboard('clientIdDisplay')">
+                            <i class="fas fa-copy"></i> コピー
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="credentials-item">
+                    <div class="credentials-label">Client Secret</div>
+                    <div class="credentials-value">
+                        <span id="clientSecretDisplay"></span>
+                        <button type="button" class="copy-btn-small" onclick="copyToClipboard('clientSecretDisplay')">
+                            <i class="fas fa-copy"></i> コピー
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 16px;">
+                    <a href="{% url 'developer:applications_list' %}" class="btn btn-submit" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-arrow-right"></i> アプリケーション一覧に戻る
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function addRedirectUri() {
+        const container = document.getElementById('redirectUriContainer');
+        const item = document.createElement('div');
+        item.className = 'redirect-uri-item';
+        item.innerHTML = `
+            <input type="url" class="redirect-uri" placeholder="https://yourapp.com/callback">
+            <button type="button" class="btn-remove-uri" onclick="removeRedirectUri(this)">
+                <i class="fas fa-trash"></i> 削除
+            </button>
+        `;
+        container.appendChild(item);
+    }
+    
+    function removeRedirectUri(btn) {
+        const container = document.getElementById('redirectUriContainer');
+        if (container.children.length > 1) {
+            btn.parentElement.remove();
+        } else {
+            alert('最低1つのリダイレクトURIが必要です');
+        }
+    }
+    
+    function validateForm() {
+        const appName = document.getElementById('appName').value.trim();
+        const redirectUris = Array.from(document.querySelectorAll('.redirect-uri')).map(el => el.value.trim());
+        
+        let isValid = true;
+        
+        if (!appName) {
+            document.getElementById('appNameError').textContent = 'アプリケーション名を入力してください';
+            isValid = false;
+        } else {
+            document.getElementById('appNameError').textContent = '';
+        }
+        
+        if (redirectUris.some(uri => !uri)) {
+            document.getElementById('redirectUriError').textContent = 'すべてのリダイレクトURIを入力してください';
+            isValid = false;
+        } else if (redirectUris.some(uri => !uri.startsWith('http'))) {
+            document.getElementById('redirectUriError').textContent = 'すべてのURIはhttp/httpsで始まる必要があります';
+            isValid = false;
+        } else {
+            document.getElementById('redirectUriError').textContent = '';
+        }
+        
+        return isValid;
+    }
+    
+    function copyToClipboard(elementId) {
+        const text = document.getElementById(elementId).textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('コピーしました');
+        });
+    }
+    
+    document.getElementById('createAppForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        if (!validateForm()) {
+            return;
+        }
+        
+        const appName = document.getElementById('appName').value.trim();
+        const appDescription = document.getElementById('appDescription').value.trim();
+        const appWebsite = document.getElementById('appWebsite').value.trim();
+        const redirectUris = Array.from(document.querySelectorAll('.redirect-uri')).map(el => el.value.trim()).join('\n');
+        const scopes = Array.from(document.querySelectorAll('input[name="scope"]:checked')).map(el => el.value).join(' ');
+        
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.classList.add('loading');
+        
+        try {
+            const response = await fetch('{% url "developer:application_create" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: appName,
+                    description: appDescription,
+                    website: appWebsite,
+                    redirect_uris: redirectUris,
+                    allowed_scopes: scopes,
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // フォームを非表示
+                document.getElementById('createAppForm').style.display = 'none';
+                
+                // 認証情報を表示
+                document.getElementById('clientIdDisplay').textContent = data.client_id;
+                document.getElementById('clientSecretDisplay').textContent = data.client_secret;
+                document.getElementById('credentialsDisplay').classList.add('show');
+                
+                // 成功メッセージ
+                document.getElementById('successText').textContent = 'アプリケーションが作成されました！';
+                document.getElementById('successMessage').classList.add('show');
+            } else {
+                alert('エラー: ' + (data.error || '不明なエラーが発生しました'));
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('エラーが発生しました');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('loading');
+        }
+    });
+</script>
+{% endblock %}
