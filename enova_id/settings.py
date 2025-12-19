@@ -10,23 +10,26 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-a8fzepjts#9i36tny87z59d=^5exmkk$a8a0^**vww145wwjce'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-a8fzepjts#9i36tny87z59d=^5exmkk$a8a0^**vww145wwjce')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Application definition
 
@@ -74,27 +77,38 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'enova_id.wsgi.application'
 
-
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.CustomUser'
-
 
 # Authentication URLs
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+DATABASE_ENGINE = os.getenv('DATABASE_ENGINE', 'django.db.backends.sqlite3')
 
+if DATABASE_ENGINE == 'django.db.backends.postgresql':
+    DATABASES = {
+        'default': {
+            'ENGINE': DATABASE_ENGINE,
+            'NAME': os.getenv('DATABASE_NAME', 'novafeed'),
+            'USER': os.getenv('DATABASE_USER', 'novafeed_user'),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD', 'novafeed_password'),
+            'HOST': os.getenv('DATABASE_HOST', 'localhost'),
+            'PORT': os.getenv('DATABASE_PORT', '5432'),
+        }
+    }
+else:
+    # SQLite3
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -114,26 +128,23 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'ja'  # 日本語に変更
-TIME_ZONE = 'Asia/Tokyo'  # 日本時間に変更
+LANGUAGE_CODE = os.getenv('LANGUAGE_CODE', 'ja')
+TIME_ZONE = os.getenv('TIME_ZONE', 'Asia/Tokyo')
 USE_I18N = True
 USE_TZ = True
 
-
 # Session Configuration
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # データベースバックエンドを明示的に指定
-SESSION_COOKIE_AGE = 1209600  # 2週間（秒）
-SESSION_SAVE_EVERY_REQUEST = True  # リクエストごとにセッションを保存（セッション追跡に必須）
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # ブラウザを閉じてもセッションを保持
-SESSION_COOKIE_NAME = 'enova_sessionid'  # セッションCookie名
-SESSION_COOKIE_HTTPONLY = True  # JavaScriptからのアクセスを防ぐ
-SESSION_COOKIE_SECURE = False  # 開発環境ではFalse、本番環境ではTrue
-SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF保護
-
+SESSION_ENGINE = os.getenv('SESSION_ENGINE', 'django.contrib.sessions.backends.db')
+SESSION_COOKIE_AGE = int(os.getenv('SESSION_COOKIE_AGE', '1209600'))  # 2週間（秒）
+SESSION_SAVE_EVERY_REQUEST = os.getenv('SESSION_SAVE_EVERY_REQUEST', 'True') == 'True'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = os.getenv('SESSION_EXPIRE_AT_BROWSER_CLOSE', 'False') == 'True'
+SESSION_COOKIE_NAME = os.getenv('SESSION_COOKIE_NAME', 'enova_sessionid')
+SESSION_COOKIE_HTTPONLY = os.getenv('SESSION_COOKIE_HTTPONLY', 'True') == 'True'
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False') == 'True'
+SESSION_COOKIE_SAMESITE = os.getenv('SESSION_COOKIE_SAMESITE', 'Lax')
 
 # Messages Framework
 from django.contrib.messages import constants as messages
@@ -146,7 +157,6 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
@@ -156,17 +166,14 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',  # 追加の静的ファイルディレクトリ
 ]
 
-
 # Media files (User uploaded files)
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 # Logging Configuration
 LOGGING = {
@@ -186,31 +193,28 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'INFO',
+        'level': os.getenv('LOG_LEVEL', 'INFO'),
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
-        'accounts': {  # accountsアプリのログ
+        'accounts': {
             'handlers': ['console'],
-            'level': 'DEBUG',  # デバッグレベル
+            'level': os.getenv('ACCOUNTS_LOG_LEVEL', 'DEBUG'),
             'propagate': False,
         },
     },
 }
 
 # WebAuthn (Passkey) 設定
-WEBAUTHN_RP_NAME = "Enova ID"  # Relying Party名
-WEBAUTHN_RP_ID = "localhost"  # 127.0.0.1は使用できない
-WEBAUTHN_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-]
-WEBAUTHN_USER_VERIFICATION = "preferred"  # "required", "preferred", "discouraged"
-WEBAUTHN_AUTHENTICATOR_ATTACHMENT = None  # None, "platform", "cross-platform"
-
+WEBAUTHN_RP_NAME = os.getenv('WEBAUTHN_RP_NAME', 'Enova ID')
+WEBAUTHN_RP_ID = os.getenv('WEBAUTHN_RP_ID', 'localhost')
+WEBAUTHN_ALLOWED_ORIGINS = os.getenv('WEBAUTHN_ALLOWED_ORIGINS', 'http://localhost:8000').split(',')
+WEBAUTHN_USER_VERIFICATION = os.getenv('WEBAUTHN_USER_VERIFICATION', 'preferred')
+WEBAUTHN_AUTHENTICATOR_ATTACHMENT = os.getenv('WEBAUTHN_AUTHENTICATOR_ATTACHMENT', None)
 
 # OAuth2 Toolkit Settings
 OAUTH2_PROVIDER = {
@@ -221,8 +225,8 @@ OAUTH2_PROVIDER = {
         'profile': 'プロフィール情報',
         'email': 'メールアドレス',
     },
-    'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,  # 10時間
-    'REFRESH_TOKEN_EXPIRE_SECONDS': 2592000,  # 30日
+    'ACCESS_TOKEN_EXPIRE_SECONDS': int(os.getenv('ACCESS_TOKEN_EXPIRE_SECONDS', '36000')),
+    'REFRESH_TOKEN_EXPIRE_SECONDS': int(os.getenv('REFRESH_TOKEN_EXPIRE_SECONDS', '2592000')),
 }
 
 REST_FRAMEWORK = {
@@ -231,23 +235,31 @@ REST_FRAMEWORK = {
     )
 }
 
-# Security Settings (開発環境用)
-# 本番環境では以下を有効化してください
-# SECURE_SSL_REDIRECT = True
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# SECURE_BROWSER_XSS_FILTER = True
-# SECURE_CONTENT_TYPE_NOSNIFF = True
-# X_FRAME_OPTIONS = 'DENY'
+# Security Settings
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False') == 'True'
+CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'False') == 'True'
+SECURE_BROWSER_XSS_FILTER = os.getenv('SECURE_BROWSER_XSS_FILTER', 'True') == 'True'
+SECURE_CONTENT_TYPE_NOSNIFF = os.getenv('SECURE_CONTENT_TYPE_NOSNIFF', 'True') == 'True'
+X_FRAME_OPTIONS = os.getenv('X_FRAME_OPTIONS', 'SAMEORIGIN')
 
+# Redis Configuration
+REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+REDIS_PORT = int(os.getenv('REDIS_PORT', '6379'))
+REDIS_DB = int(os.getenv('REDIS_DB', '0'))
 
-# Email Configuration (開発環境用)
-# 本番環境では実際のメールサーバー設定に変更してください
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # コンソールに出力
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # 本番環境
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'your-email@gmail.com'
-# EMAIL_HOST_PASSWORD = 'your-password'
-# DEFAULT_FROM_EMAIL = 'noreply@example.com'
+# Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache' if os.getenv('USE_REDIS_CACHE', 'False') == 'True' else 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}' if os.getenv('USE_REDIS_CACHE', 'False') == 'True' else 'unique-snowflake',
+    }
+}
+
+# Email Configuration
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@example.com')
